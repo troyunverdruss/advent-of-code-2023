@@ -1,73 +1,92 @@
 from dataclasses import dataclass
+from typing import Dict
+
+numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 
-@dataclass
-class Round:
-    red: int
-    green: int
-    blue: int
+@dataclass(frozen=True)
+class Point:
+    x: int
+    y: int
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
 
 
-@dataclass
-class Game:
-    id: int
-    rounds: list[Round]
+adjacency_vectors = [
+    Point(-1, -1), Point(0, -1), Point(1, -1),
+    Point(-1, 0), Point(1, 0),
+    Point(-1, 1), Point(0, 1), Point(1, 1),
+]
 
 
 def read_lines() -> [str]:
-    with open("inputs/day2.txt") as f:
-        return f.readlines()
+    with open("inputs/day3.txt") as f:
+        return map(lambda x: x.strip(), f.readlines())
 
 
-def parse_rounds(line: str) -> [Round]:
-    rounds = []
-
-    for r in line.split(";"):
-        red = 0
-        green = 0
-        blue = 0
-        for type in r.split(","):
-            (count, color) = type.strip().split(" ")
-            if color == "red":
-                red = int(count)
-            elif color == "green":
-                green = int(count)
-            elif color == "blue":
-                blue = int(count)
-            else:
-                raise f"Bad parsing of this line: {type}"
-        rounds.append(Round(red, green, blue))
-
-    return rounds
+def read_grid(lines) -> Dict[Point, str]:
+    grid = {}
+    for (y_idx, row) in enumerate(lines):
+        for (x_idx, c) in enumerate(row):
+            grid[Point(x_idx, y_idx)] = c
+    return grid
 
 
-def parse_line_as_game(line: str) -> Game:
-    # Game 90: 7 red; 5 blue, 11 red, 8 green; 8 red, 3 green, 2 blue
-    (a, b) = line.split(":")
-    game_id = int(a.split(" ")[1])
-    game_rounds = parse_rounds(b)
-    return Game(game_id, game_rounds)
+def find_symbol_locations(grid: Dict[Point, str]) -> [Point]:
+    not_symbols = ['.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    return list(filter(lambda x: grid[x] not in not_symbols, grid.keys()))
 
 
-def game_is_valid(game: Game) -> bool:
-    part1_valid_round = Round(12, 13, 14)
-    return all(
-        map(
-            lambda x: x.red <= part1_valid_round.red
-                      and x.green <= part1_valid_round.green
-                      and x.blue <= part1_valid_round.blue,
-            game.rounds
-        )
-    )
+# locations can refer to the same number!!
+def find_number_locs(grid):
+    symbol_locs = find_symbol_locations(grid)
+    numbers_locs = []
+    for sl in symbol_locs:
+        for vec in adjacency_vectors:
+            if grid[sl + vec] in numbers:
+                numbers_locs.append(sl + vec)
+    return numbers_locs
 
 
-def get_valid_game_ids(games) -> [str]:
-    return list(map(lambda x: x.id, filter(lambda x: game_is_valid(x), games)))
+def number_loc_to_part_number_loc(grid, num_loc):
+    # find the start
+    start = num_loc
+    while True:
+        test_point = start + Point(-1, 0)
+        if test_point in grid.keys() and grid[test_point] in numbers:
+            start = test_point
+        else:
+            break
+    return start
+
+
+def part_number_loc_to_part_number(grid, part_number_loc):
+    position = part_number_loc
+    digits = [grid[part_number_loc]]
+    while (position + Point(1, 0)) in grid.keys() and grid[position + Point(1, 0)] in numbers:
+        digits.append(grid[position + Point(1, 0)])
+        position = position + Point(1, 0)
+    return int(''.join(digits))
+
+
+def find_part_numbers(grid: Dict[Point, str]) -> [int]:
+    number_locs = find_number_locs(grid)
+    part_number_locs = set()
+    for num_loc in number_locs:
+        part_number_loc = number_loc_to_part_number_loc(grid, num_loc)
+        part_number_locs.add(part_number_loc)
+    part_numbers = []
+    for part_number_loc in part_number_locs:
+        part_number = part_number_loc_to_part_number(grid, part_number_loc)
+        part_numbers.append(part_number)
+    return part_numbers
 
 
 def part1():
-    games = list(map(lambda x: parse_line_as_game(x), read_lines()))
-    return sum(get_valid_game_ids(games))
+    grid = read_grid(read_lines())
+    part_numbers = find_part_numbers(grid)
+    return sum(part_numbers)
 
 
 if __name__ == "__main__":

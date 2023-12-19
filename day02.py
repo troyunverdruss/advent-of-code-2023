@@ -82,6 +82,7 @@ def part2():
     power_sum = sum(map(lambda x: compute_game_power(x), games))
     return power_sum
 
+
 if __name__ == "__main__":
     print(part1())
     print(part2())
