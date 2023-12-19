@@ -70,5 +70,18 @@ def part1():
     return sum(get_valid_game_ids(games))
 
 
+def compute_game_power(game: Game) -> int:
+    max_red = max(map(lambda x: x.red, game.rounds))
+    max_green = max(map(lambda x: x.green, game.rounds))
+    max_blue = max(map(lambda x: x.blue, game.rounds))
+    return max_red * max_green * max_blue
+
+
+def part2():
+    games = list(map(lambda x: parse_line_as_game(x), read_lines()))
+    power_sum = sum(map(lambda x: compute_game_power(x), games))
+    return power_sum
+
 if __name__ == "__main__":
     print(part1())
+    print(part2())
