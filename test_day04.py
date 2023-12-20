@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from ddt import ddt
 
-from day04 import parse_cards
+from day04 import parse_cards, part2
 
 sample_cards = [
     "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53",
@@ -38,3 +38,9 @@ class Test(TestCase):
                 expected[i],
                 c.card_points()
             )
+
+    def test_part2(self):
+        self.assertEqual(
+            30,
+            part2(sample_cards)
+        )

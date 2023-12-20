@@ -37,5 +37,19 @@ def part1():
     return sum(map(lambda x: x.card_points(), cards))
 
 
+def part2(lines: [str]):
+    cards = parse_cards(lines)
+    card_counts = dict(map(lambda c: (c.id, 1), cards))
+    for card in cards:
+        id = card.id
+        winners = card.count_winning_numbers()
+        for i in range(0, winners):
+            card_counts[id + i + 1] += card_counts[id]
+    return sum(card_counts.values())
+
+    return sum(map(lambda x: card_counts[x], card_counts.keys()))
+
+
 if __name__ == "__main__":
     print(part1())
+    print(part2(read_lines("inputs/day4.txt")))
