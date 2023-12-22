@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from day05 import ConversionRule, Converter, parse_input_to_seeds_converters, convert_seed_to_location
+from day05 import ConversionRule, Converter, parse_input_to_seeds_converters, convert_seed_to_location, \
+    brute_force_convert_seed_range_to_lowest_location, convert_seed_range_to_lowest_location, part2
 
 sample_input = """seeds: 79 14 55 13
 
@@ -70,3 +71,26 @@ class TestConverter(TestCase):
         self.assertEqual(43, convert_seed_to_location(converters, 14))
         self.assertEqual(86, convert_seed_to_location(converters, 55))
         self.assertEqual(35, convert_seed_to_location(converters, 13))
+
+    def test_part2_brute_force(self):
+        (seeds, converters) = parse_input_to_seeds_converters(sample_input)
+        low1 = brute_force_convert_seed_range_to_lowest_location(converters, seeds[0], seeds[1])
+        low2 = brute_force_convert_seed_range_to_lowest_location(converters, seeds[2], seeds[3])
+        self.assertEqual(46, min(low1, low2))
+
+    def test_part2_smarter(self):
+        (seeds, converters) = parse_input_to_seeds_converters(sample_input)
+        low1 = convert_seed_range_to_lowest_location(converters, seeds[0], seeds[1])
+        low2 = convert_seed_range_to_lowest_location(converters, seeds[2], seeds[3])
+        self.assertEqual(46, min(low1, low2))
+
+    def test_verify_reverse_convert(self):
+        (seeds, converters) = parse_input_to_seeds_converters(sample_input)
+        converter = converters[0]
+        for i in range(seeds[0], seeds[0] + seeds[1]):
+            forward = converter.convert(i)
+            reverse = converter.reverse_convert(forward)
+            self.assertEqual(i, reverse)
+
+    def test_part2(self):
+        self.assertEqual(46, part2(sample_input))
