@@ -65,7 +65,7 @@ def brute_force_convert_seed_range_to_lowest_location(converters: [Converter], s
 
 def find_boundaries_in_terms_of_seed(converters: [Converter]) -> [int]:
     all_boundaries = []
-    for i in range(len(converters)-1, 0, -1):
+    for i in range(len(converters) - 1, 0, -1):
         for conversion_rule in converters[i].conversion_rules:
             boundary = convert_backwards_from_converter_index(converters, i, conversion_rule.source_range_start)
             all_boundaries.append(boundary)
@@ -75,7 +75,7 @@ def find_boundaries_in_terms_of_seed(converters: [Converter]) -> [int]:
 def convert_backwards_from_converter_index(converters: [Converter], starting_index: int, value: int) -> int:
     new_value = value
     for i in range(starting_index, 0, -1):
-        new_value = converters[i-1].reverse_convert(new_value)
+        new_value = converters[i - 1].reverse_convert(new_value)
     return new_value
 
 
@@ -104,9 +104,18 @@ def part1():
 
 def part2(raw_file_data):
     (seeds, converters) = parse_input_to_seeds_converters(raw_file_data)
+
+    # # simpler approach to find the bug
+    # possible_seeds = []
+    # for i in range(0, len(seeds), 2):
+    #     possible_seed = convert_seed_range_to_lowest_location(converters, seeds[i], seeds[i+1])
+    #     print(f"{seeds[i]} {seeds[i+1]} => {possible_seed}")
+    #     possible_seeds.append(possible_seed)
+    # return min(possible_seeds)
+
     return min(
         map(
-            lambda x: convert_seed_range_to_lowest_location(converters, seeds[x * 2], seeds[x * 2] + 1),
+            lambda x: convert_seed_range_to_lowest_location(converters, seeds[x * 2], seeds[x * 2 + 1]),
             range(int(len(seeds) / 2))
         )
     )

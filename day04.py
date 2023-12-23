@@ -47,8 +47,6 @@ def part2(lines: [str]):
             card_counts[id + i + 1] += card_counts[id]
     return sum(card_counts.values())
 
-    return sum(map(lambda x: card_counts[x], card_counts.keys()))
-
 
 if __name__ == "__main__":
     print(part1())
