@@ -97,7 +97,7 @@ def read_raw_file_data(path):
 
 
 def part1():
-    raw_file_data = read_raw_file_data("inputs/day5.txt")
+    raw_file_data = read_raw_file_data("../inputs/day5.txt")
     (seeds, converters) = parse_input_to_seeds_converters(raw_file_data)
     return min(map(lambda x: convert_seed_to_location(converters, x), seeds))
 
@@ -123,4 +123,4 @@ def part2(raw_file_data):
 
 if __name__ == "__main__":
     print(part1())
-    print(part2(read_raw_file_data("inputs/day5.txt")))
+    print(part2(read_raw_file_data("../inputs/day5.txt")))

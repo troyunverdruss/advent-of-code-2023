@@ -2,7 +2,7 @@ integers_as_str = list(map(lambda x: str(x), [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 
 
 def read_lines() -> [str]:
-    with open("inputs/day1.txt") as f:
+    with open("../inputs/day1.txt") as f:
         return filter(lambda x: x != "", map(lambda x: x.strip(), f.readlines()))
 
 

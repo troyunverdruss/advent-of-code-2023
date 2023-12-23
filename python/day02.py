@@ -15,7 +15,7 @@ class Game:
 
 
 def read_lines() -> [str]:
-    with open("inputs/day2.txt") as f:
+    with open("../inputs/day2.txt") as f:
         return f.readlines()
 
 

@@ -32,7 +32,7 @@ def parse_cards(lines: [str]) -> [Card]:
 
 
 def part1():
-    lines = read_lines("inputs/day4.txt")
+    lines = read_lines("../inputs/day4.txt")
     cards = parse_cards(lines)
     return sum(map(lambda x: x.card_points(), cards))
 
@@ -50,4 +50,4 @@ def part2(lines: [str]):
 
 if __name__ == "__main__":
     print(part1())
-    print(part2(read_lines("inputs/day4.txt")))
+    print(part2(read_lines("../inputs/day4.txt")))

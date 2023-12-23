@@ -99,7 +99,7 @@ def find_part_numbers(grid: Dict[Point, str]) -> [int]:
 
 
 def part1():
-    grid = read_grid(read_lines("inputs/day3.txt"))
+    grid = read_grid(read_lines("../inputs/day3.txt"))
     part_numbers = find_part_numbers(grid)
     return sum(part_numbers)
 
@@ -130,7 +130,7 @@ def find_gear_ratios(grid):
 
 
 def part2():
-    grid = read_grid(read_lines("inputs/day3.txt"))
+    grid = read_grid(read_lines("../inputs/day3.txt"))
     ratios = find_gear_ratios(grid)
     return sum(ratios)
 
