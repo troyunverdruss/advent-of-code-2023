@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/aoc2023.iml" filepath="$PROJECT_DIR$/.idea/aoc2023.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java_kotlin/java_kotlin.iml" filepath="$PROJECT_DIR$/java_kotlin/java_kotlin.iml" />
     </modules>
   </component>
 </project>
