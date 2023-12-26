@@ -1,7 +1,7 @@
 import day06.Day06
 
 fun main() {
-    println("Hello World!")
-    var day06 = Day06()
-    print(day06.part1())
+    val day06 = Day06()
+    println(day06.part1())
+    println(day06.part2())
 }

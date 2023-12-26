@@ -9,14 +9,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Day06 {
-    public int part1() {
+    public Long part1() {
         List<String> lines = read_input();
-        List<Integer> times = splitLineToInts(lines.getFirst());
-        List<Integer> distances = splitLineToInts(lines.get(1));
+        List<Long> times = splitLineToNumbers(lines.getFirst());
+        List<Long> distances = splitLineToNumbers(lines.get(1));
 
         List<GameConfig> gameConfigs = IntStream.range(0, times.size())
                 .mapToObj(i -> new GameConfig(times.get(i), distances.get(i)))
@@ -26,15 +25,23 @@ public class Day06 {
                 .map(gc -> new WinningDetails(findFirstWinningIndex(gc), findLastWinningIndex(gc)))
                 .toList();
 
-        Integer product = winningDetails.stream()
+        Long product = winningDetails.stream()
                 .map(WinningDetails::waysToWin)
-                .reduce(1, (subtotal, element) -> subtotal * element);
+                .reduce(1L, (subtotal, element) -> subtotal * element);
 
         return product;
     }
 
-    private @NotNull Integer findFirstWinningIndex(GameConfig p) {
-        for (int i = 0; i < p.time; i++) {
+    public Long part2() {
+        List<String> lines = read_input();
+        Long time = Long.parseLong(lines.get(0).replace(" ", "").split(":")[1]);
+        Long distance = Long.parseLong(lines.get(1).replace(" ", "").split(":")[1]);
+        GameConfig gameConfig = new GameConfig(time, distance);
+        return new WinningDetails(findFirstWinningIndex(gameConfig), findLastWinningIndex(gameConfig)).waysToWin();
+    }
+
+    private @NotNull Long findFirstWinningIndex(GameConfig p) {
+        for (long i = 0; i < p.time; i++) {
             if (i * (p.time - i) > p.winningDistance) {
                 return i;
             }
@@ -42,18 +49,18 @@ public class Day06 {
         throw new RuntimeException("Couldn't find a lower winning index");
     }
 
-    private @NotNull Integer findLastWinningIndex(GameConfig p) {
-        for (int i = p.time; i >= 0; i--) {
+    private @NotNull Long findLastWinningIndex(GameConfig p) {
+        for (long i = p.time; i >= 0; i--) {
             if (i * (p.time - i) > p.winningDistance) {
                 return i;
             }
         }
-        throw new RuntimeException("Couldn't find a lower winning index");
+        throw new RuntimeException("Couldn't find an upper winning index");
     }
 
-    private List<Integer> splitLineToInts(String line) {
+    private List<Long> splitLineToNumbers(String line) {
         List<String> items = Arrays.stream(line.split(" ")).filter(s -> !s.isBlank()).toList();
-        return items.subList(1, items.size()).stream().map(Integer::parseInt).toList();
+        return items.subList(1, items.size()).stream().map(Long::parseLong).toList();
     }
 
     private List<String> read_input() {
@@ -72,11 +79,11 @@ public class Day06 {
         }
     }
 
-    private record GameConfig(int time, int winningDistance) {
+    private record GameConfig(Long time, Long winningDistance) {
     }
 
-    private record WinningDetails(int lowestIndex, int highestIndex) {
-        public int waysToWin() {
+    private record WinningDetails(Long lowestIndex, Long highestIndex) {
+        public Long waysToWin() {
             return highestIndex - lowestIndex + 1;
         }
     }
