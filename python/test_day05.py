@@ -38,7 +38,7 @@ humidity-to-location map:
 56 93 4"""
 
 
-class TestConverter(TestCase):
+class TestDay05(TestCase):
     def test_seed_to_soil(self):
         cr1 = ConversionRule(50, 98, 2)
         cr2 = ConversionRule(52, 50, 48)

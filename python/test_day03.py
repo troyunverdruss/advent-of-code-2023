@@ -16,7 +16,7 @@ test_input = [
 ]
 
 
-class Test(TestCase):
+class TestDay03(TestCase):
     def test_find_part_numbers(self):
         grid = read_grid(test_input)
         symbol_locs = find_symbol_locations(grid)

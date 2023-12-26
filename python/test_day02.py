@@ -3,7 +3,7 @@ from unittest import TestCase
 from day02 import parse_line_as_game, game_is_valid
 
 
-class Test(TestCase):
+class TestDay02(TestCase):
     def test_game_1(self):
         game = parse_line_as_game("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green")
         self.assertTrue(game_is_valid(game))

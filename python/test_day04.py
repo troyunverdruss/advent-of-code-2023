@@ -15,7 +15,7 @@ sample_cards = [
 
 
 @ddt
-class Test(TestCase):
+class TestDay04(TestCase):
     def test_card1(self):
         card = parse_cards(sample_cards)[0]
         self.assertEqual(1, card.id)

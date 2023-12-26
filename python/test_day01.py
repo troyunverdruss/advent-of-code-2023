@@ -5,7 +5,7 @@ import day01
 
 
 @ddt
-class Test(TestCase):
+class TestDay01(TestCase):
 
     def test_first_and_last_as_num(self):
         self.assertEqual(
