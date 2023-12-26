@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 public class Day06 {
     public Long part1() {
-        List<String> lines = read_input();
+        List<String> lines = read_input("inputs/day6.txt");
         List<Long> times = splitLineToNumbers(lines.getFirst());
         List<Long> distances = splitLineToNumbers(lines.get(1));
 
@@ -31,7 +31,7 @@ public class Day06 {
     }
 
     public Long part2() {
-        List<String> lines = read_input();
+        List<String> lines = read_input("inputs/day6.txt");
         Long time = Long.parseLong(lines.get(0).replace(" ", "").split(":")[1]);
         Long distance = Long.parseLong(lines.get(1).replace(" ", "").split(":")[1]);
         GameConfig gameConfig = new GameConfig(time, distance);
@@ -61,10 +61,10 @@ public class Day06 {
         return items.subList(1, items.size()).stream().map(Long::parseLong).toList();
     }
 
-    private List<String> read_input() {
+    public static List<String> read_input(String path) {
         List<String> lines = new ArrayList<>();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("inputs/day6.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader(path));
 
             String line = reader.readLine();
             while (line != null) {
