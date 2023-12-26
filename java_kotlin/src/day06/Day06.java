@@ -25,11 +25,9 @@ public class Day06 {
                 .map(gc -> new WinningDetails(findFirstWinningIndex(gc), findLastWinningIndex(gc)))
                 .toList();
 
-        Long product = winningDetails.stream()
+        return winningDetails.stream()
                 .map(WinningDetails::waysToWin)
                 .reduce(1L, (subtotal, element) -> subtotal * element);
-
-        return product;
     }
 
     public Long part2() {
@@ -40,18 +38,18 @@ public class Day06 {
         return new WinningDetails(findFirstWinningIndex(gameConfig), findLastWinningIndex(gameConfig)).waysToWin();
     }
 
-    private @NotNull Long findFirstWinningIndex(GameConfig p) {
-        for (long i = 0; i < p.time; i++) {
-            if (i * (p.time - i) > p.winningDistance) {
+    static @NotNull Long findFirstWinningIndex(GameConfig gameConfig) {
+        for (long i = 0; i < gameConfig.time; i++) {
+            if (i * (gameConfig.time - i) > gameConfig.winningDistance) {
                 return i;
             }
         }
         throw new RuntimeException("Couldn't find a lower winning index");
     }
 
-    private @NotNull Long findLastWinningIndex(GameConfig p) {
-        for (long i = p.time; i >= 0; i--) {
-            if (i * (p.time - i) > p.winningDistance) {
+    static @NotNull Long findLastWinningIndex(GameConfig gameConfig) {
+        for (long i = gameConfig.time; i >= 0; i--) {
+            if (i * (gameConfig.time - i) > gameConfig.winningDistance) {
                 return i;
             }
         }
@@ -79,10 +77,10 @@ public class Day06 {
         }
     }
 
-    private record GameConfig(Long time, Long winningDistance) {
+    record GameConfig(Long time, Long winningDistance) {
     }
 
-    private record WinningDetails(Long lowestIndex, Long highestIndex) {
+    record WinningDetails(Long lowestIndex, Long highestIndex) {
         public Long waysToWin() {
             return highestIndex - lowestIndex + 1;
         }
