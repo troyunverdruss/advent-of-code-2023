@@ -3,6 +3,10 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.12 (aoc2023)" />
   </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="workspaceImportForciblyTurnedOn" value="true" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="openjdk-21" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/java_kotlin/out" />
   </component>

@@ -1,11 +1,12 @@
-package day06;
+package day07;
 
+import day07.Day07;
 import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static day06.Day07.calculateValue;
+import static day07.Day07.calculateValue;
 import static org.testng.Assert.*;
 
 public class Day07Test {

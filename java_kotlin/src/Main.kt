@@ -1,6 +1,6 @@
 import day06.Day06
-import day06.Day07
-import day06.Day07Part2
+import day07.Day07
+import day07.Day07Part2
 
 fun main() {
     val day06 = Day06()

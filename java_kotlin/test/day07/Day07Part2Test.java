@@ -1,13 +1,13 @@
-package day06;
+package day07;
 
 import org.testng.annotations.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static day06.Day07Part2.calculateValue;
-import static org.testng.Assert.*;
+import static day07.Day07Part2.calculateValue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class Day07Part2Test {
 
