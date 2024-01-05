@@ -140,6 +140,4 @@ public class Day07Test {
         Day07.Hand hand2 = Day07.Hand.create("AAJQK 123");
         assertTrue(hand1.compareTo(hand2) < 0);
     }
-
-
 }
