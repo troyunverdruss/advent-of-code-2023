@@ -34,7 +34,7 @@ public class Day08Test {
     }
 
     @Test
-    public void testExamplePart2() {
+    public void testExamplePart2BruteForce() {
         List<String> lines = List.of(
                 "11A = (11B, XXX)",
                 "11B = (XXX, 11Z)",
@@ -46,6 +46,21 @@ public class Day08Test {
                 "XXX = (XXX, XXX)"
         );
         long steps = Day08.solvePart2BruteForce("LR", Day08.parseNodes(lines));
+        assertEquals(steps, 6);
+    }
+    @Test
+    public void testExamplePart2() {
+        List<String> lines = List.of(
+                "11A = (11B, XXX)",
+                "11B = (XXX, 11Z)",
+                "11Z = (11B, XXX)",
+                "22A = (22B, XXX)",
+                "22B = (22C, 22C)",
+                "22C = (22Z, 22Z)",
+                "22Z = (22B, 22B)",
+                "XXX = (XXX, XXX)"
+        );
+        long steps = Day08.solvePart2("LR", Day08.parseNodes(lines));
         assertEquals(steps, 6);
     }
 

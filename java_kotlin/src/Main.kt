@@ -1,15 +1,22 @@
 import day06.Day06
 import day07.Day07
 import day07.Day07Part2
+import day08.Day08
 
 fun main() {
+    println("Day 6")
     val day06 = Day06()
     println(day06.part1())
     println(day06.part2())
 
-    val day07 = Day07();
+    println("Day 7")
+    val day07 = Day07()
     println(day07.part1())
-    val day07Part2 = Day07Part2();
+    val day07Part2 = Day07Part2()
     println(day07Part2.part2())
-    // too high 250302206
+
+    println("Day 8")
+    val day08 = Day08()
+    println(day08.part1())
+    println(day08.part2())
 }
