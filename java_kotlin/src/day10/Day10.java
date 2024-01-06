@@ -10,15 +10,14 @@ public class Day10 {
         Map<Point, String> grid = parseGrid(lines);
         return solvePart1(grid);
     }
+    public Long part2() {
+        List<String> lines = Day06.read_input("inputs/day10.txt");
+        Map<Point, String> grid = parseGrid(lines);
+        return solvePart2(grid);
+    }
 
     static Long solvePart1(Map<Point, String> grid) {
-        Point start = grid
-                .entrySet()
-                .stream()
-                .filter(e -> e.getValue().equals("S"))
-                .map(Map.Entry::getKey)
-                .toList()
-                .getFirst();
+        Point start = getStartingPoint(grid);
 
         ConnectedPipes connectedPipes = findConnectedPipeNeighbors(grid, start);
         Set<Point> visited = new HashSet<>();
@@ -49,7 +48,7 @@ public class Day10 {
             } else if (!visited.contains(connectedPipes2.second)) {
                 nextPath2Loc = connectedPipes2.second;
             } else {
-                throw new RuntimeException("Uh oh, no new point found for path1");
+                throw new RuntimeException("Uh oh, no new point found for path2");
             }
 
             visited.add(path1Loc);
@@ -57,6 +56,53 @@ public class Day10 {
             path1Loc = nextPath1Loc;
             path2Loc = nextPath2Loc;
 
+            steps += 1;
+        }
+
+        return steps;
+    }
+
+    private static Point getStartingPoint(Map<Point, String> grid) {
+        return grid
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue().equals("S"))
+                .map(Map.Entry::getKey)
+                .toList()
+                .getFirst();
+    }
+
+    static Long solvePart2(Map<Point, String> grid) {
+        Point start = getStartingPoint(grid);
+
+        ConnectedPipes connectedPipes = findConnectedPipeNeighbors(grid, start);
+        Set<Point> visited = new HashSet<>();
+        visited.add(start);
+
+        Point path1Loc = connectedPipes.first;
+        Point nextPath1Loc;
+        visited.add(path1Loc);
+
+
+        // Start at 1 because we're not starting at "S"
+        // but instead the first step along the pathway
+        long steps = 1;
+        boolean nothingNewFound = false;
+        while (!nothingNewFound) {
+            ConnectedPipes connectedPipes1 = findConnectedPipeNeighbors(grid, path1Loc);
+            if (!visited.contains(connectedPipes1.first)) {
+                System.out.println("next location:" + connectedPipes1.first);
+                nextPath1Loc = connectedPipes1.first;
+                path1Loc = nextPath1Loc;
+            } else if (!visited.contains(connectedPipes1.second)) {
+                nextPath1Loc = connectedPipes1.second;
+                System.out.println("next location:" + connectedPipes1.second);
+                path1Loc = nextPath1Loc;
+            } else {
+                nothingNewFound = true;
+            }
+
+            visited.add(path1Loc);
             steps += 1;
         }
 

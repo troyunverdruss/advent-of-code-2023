@@ -20,7 +20,7 @@ public class Day10Test {
                 "....."
         );
         Map<Day10.Point, String> grid = Day10.parseGrid(sample);
-        assertEquals(Day10.solvePart1(grid), 4);
+        assertEquals(Day10.solvePart2(grid), 4);
     }
 
     @Test
