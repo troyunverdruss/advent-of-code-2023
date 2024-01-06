@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Day10 {
     public Long part1() {
-        List<String> lines = Day06.read_input("inputs/day9.txt");
+        List<String> lines = Day06.read_input("inputs/day10.txt");
         Map<Point, String> grid = parseGrid(lines);
         return solvePart1(grid);
     }
@@ -30,7 +30,9 @@ public class Day10 {
         Point nextPath2Loc;
 
 
-        long steps = 0;
+        // Start at 1 because we're not starting at "S"
+        // but instead the first step along the pathway
+        long steps = 1;
         while (!path1Loc.equals(path2Loc)) {
             ConnectedPipes connectedPipes1 = findConnectedPipeNeighbors(grid, path1Loc);
             if (!visited.contains(connectedPipes1.first)) {
@@ -77,30 +79,46 @@ public class Day10 {
 
     static ConnectedPipes findConnectedPipeNeighbors(Map<Point, String> grid, Point loc) {
         List<Point> connections = new ArrayList<>();
+        String currentValue = grid.get(loc);
 
         // Up
-        Point testUp = loc.add(new Point(0, -1));
-        String upValue = grid.getOrDefault(testUp, ".");
-        if ("S".equals(upValue) || "|".equals(upValue) || "7".equals(upValue) || "F".equals(upValue)) {
-            connections.add(testUp);
+        // Test for connections only if current value can connect upwards
+        if ("S".equals(currentValue) || "|".equals(currentValue) || "J".equals(currentValue) || "L".equals(currentValue)) {
+            Point testUp = loc.add(new Point(0, -1));
+            String upValue = grid.getOrDefault(testUp, ".");
+            if ("S".equals(upValue) || "|".equals(upValue) || "7".equals(upValue) || "F".equals(upValue)) {
+                connections.add(testUp);
+            }
         }
+
         // Right
-        Point testRight = loc.add(new Point(1, 0));
-        String rightValue = grid.getOrDefault(testRight, ".");
-        if ("S".equals(rightValue) || "-".equals(rightValue) || "J".equals(rightValue) || "7".equals(rightValue)) {
-            connections.add(testRight);
+        // Test for connections only if current value can connect rightwards
+        if ("S".equals(currentValue) || "-".equals(currentValue) || "L".equals(currentValue) || "F".equals(currentValue)) {
+            Point testRight = loc.add(new Point(1, 0));
+            String rightValue = grid.getOrDefault(testRight, ".");
+            if ("S".equals(rightValue) || "-".equals(rightValue) || "J".equals(rightValue) || "7".equals(rightValue)) {
+                connections.add(testRight);
+            }
         }
+
         // Down
-        Point testDown = loc.add(new Point(0, 1));
-        String downValue = grid.getOrDefault(testDown, ".");
-        if ("S".equals(downValue) || "|".equals(downValue) || "J".equals(downValue) || "L".equals(downValue)) {
-            connections.add(testDown);
+        // Test for connections only if current value can connect downwards
+        if ("S".equals(currentValue) || "|".equals(currentValue) || "7".equals(currentValue) || "F".equals(currentValue)) {
+            Point testDown = loc.add(new Point(0, 1));
+            String downValue = grid.getOrDefault(testDown, ".");
+            if ("S".equals(downValue) || "|".equals(downValue) || "J".equals(downValue) || "L".equals(downValue)) {
+                connections.add(testDown);
+            }
         }
+
         // Left
-        Point testLeft = loc.add(new Point(-1, 0));
-        String leftValue = grid.getOrDefault(testLeft, ".");
-        if ("S".equals(leftValue) || "-".equals(leftValue) || "L".equals(leftValue) || "F".equals(leftValue)) {
-            connections.add(testDown);
+        // Test for connections only if current value can connect leftwards
+        if ("S".equals(currentValue) || "-".equals(currentValue) || "J".equals(currentValue) || "7".equals(currentValue)) {
+            Point testLeft = loc.add(new Point(-1, 0));
+            String leftValue = grid.getOrDefault(testLeft, ".");
+            if ("S".equals(leftValue) || "-".equals(leftValue) || "L".equals(leftValue) || "F".equals(leftValue)) {
+                connections.add(testLeft);
+            }
         }
 
         if (connections.size() != 2) {
