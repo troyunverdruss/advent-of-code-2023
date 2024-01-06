@@ -3,6 +3,7 @@ import day07.Day07
 import day07.Day07Part2
 import day08.Day08
 import day09.Day09
+import day10.Day10
 
 fun main() {
     println("Day 6")
@@ -25,5 +26,9 @@ fun main() {
     val day09 = Day09()
     println(day09.part1())
     println(day09.part2())
+
+    println("Day 10")
+    val day10 = Day10()
+    println(day10.part1())
 
 }
