@@ -7,6 +7,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Day10 {
+    static final String POSITION_WAS_IN_ORIGINAL_GRID_VALUE = "*";
+    static final String POSITION_IS_OUTSIDE_PIPES_VALUE = "O";
+    static final String POSITION_IS_INSIDE_PIPES_VALUE = "I";
+    static final String POSITION_IS_NOT_PART_OF_ORIGINAL_GRID = "_";
+    static final String POSITION_IS_PIPE = "#";
+
     public Long part1() {
         List<String> lines = Day06.read_input("inputs/day10.txt");
         Map<Point, String> grid = parseGrid(lines);
@@ -77,6 +83,42 @@ public class Day10 {
 
     static Long solvePart2(Map<Point, String> grid) {
         Point start = getStartingPoint(grid);
+        Map<Point, String> expandedGrid = expandGrid(grid, start);
+
+        long countCannotReachPerimeter = 0;
+        Set<Point> testedPoints = new HashSet<>();
+        for (Point point : grid.keySet()) {
+//            System.out.println("testedPoints.size() = " + testedPoints.size());
+            Point expandedPoint = new Point(point.x * 2, point.y * 2);
+            // Skip points we've found already
+            if (testedPoints.contains(expandedPoint)) {
+                continue;
+            }
+            testedPoints.add(expandedPoint);
+            String currentValue = expandedGrid.get(expandedPoint);
+            if (!POSITION_IS_PIPE.equals(currentValue)) {
+                PerimeterSearchResult perimeterSearchResult = canReachPerimeter(expandedGrid, expandedPoint);
+
+                for (Point visitedPoint : perimeterSearchResult.visited) {
+                    String val = expandedGrid.get(visitedPoint);
+                    testedPoints.add(visitedPoint);
+                    if (perimeterSearchResult.canReach) {
+                        expandedGrid.put(visitedPoint, POSITION_IS_OUTSIDE_PIPES_VALUE);
+                    } else {
+                        expandedGrid.put(visitedPoint, POSITION_IS_INSIDE_PIPES_VALUE);
+                        if (!POSITION_WAS_IN_ORIGINAL_GRID_VALUE.equals(val)) {
+                            countCannotReachPerimeter += 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return countCannotReachPerimeter;
+    }
+
+    @NotNull
+    private static Map<Point, String> expandGrid(Map<Point, String> grid, Point start) {
         Map<Point, String> expandedGrid = grid
                 .entrySet()
                 .stream()
@@ -87,83 +129,56 @@ public class Day10 {
         for (Point point : pipePositions) {
             String val = grid.get(point);
             Point expandedGridPoint = new Point(point.x * 2, point.y * 2);
-            expandedGrid.put(expandedGridPoint, "#");
+            expandedGrid.put(expandedGridPoint, POSITION_IS_PIPE);
             switch (val) {
                 case "S" -> {
+                    // Nothing to do for S, neighboring pipes will expand to connect
+                    // to this original place and then we don't have to figure out
+                    // in which directions the pipes are connected
                 }
                 case "|" -> {
-                    expandedGrid.put(expandedGridPoint.up(), "#");
-                    expandedGrid.put(expandedGridPoint.down(), "#");
+                    expandedGrid.put(expandedGridPoint.up(), POSITION_IS_PIPE);
+                    expandedGrid.put(expandedGridPoint.down(), POSITION_IS_PIPE);
                 }
                 case "-" -> {
-                    expandedGrid.put(expandedGridPoint.left(), "#");
-                    expandedGrid.put(expandedGridPoint.right(), "#");
+                    expandedGrid.put(expandedGridPoint.left(), POSITION_IS_PIPE);
+                    expandedGrid.put(expandedGridPoint.right(), POSITION_IS_PIPE);
                 }
                 case "L" -> {
-                    expandedGrid.put(expandedGridPoint.up(), "#");
-                    expandedGrid.put(expandedGridPoint.right(), "#");
+                    expandedGrid.put(expandedGridPoint.up(), POSITION_IS_PIPE);
+                    expandedGrid.put(expandedGridPoint.right(), POSITION_IS_PIPE);
                 }
                 case "J" -> {
-                    expandedGrid.put(expandedGridPoint.up(), "#");
-                    expandedGrid.put(expandedGridPoint.left(), "#");
+                    expandedGrid.put(expandedGridPoint.up(), POSITION_IS_PIPE);
+                    expandedGrid.put(expandedGridPoint.left(), POSITION_IS_PIPE);
                 }
                 case "7" -> {
-                    expandedGrid.put(expandedGridPoint.left(), "#");
-                    expandedGrid.put(expandedGridPoint.down(), "#");
+                    expandedGrid.put(expandedGridPoint.left(), POSITION_IS_PIPE);
+                    expandedGrid.put(expandedGridPoint.down(), POSITION_IS_PIPE);
                 }
                 case "F" -> {
-                    expandedGrid.put(expandedGridPoint.right(), "#");
-                    expandedGrid.put(expandedGridPoint.down(), "#");
+                    expandedGrid.put(expandedGridPoint.right(), POSITION_IS_PIPE);
+                    expandedGrid.put(expandedGridPoint.down(), POSITION_IS_PIPE);
                 }
                 case null, default ->
                         throw new RuntimeException("Shouldn't have any unexpected chars in the pipe positions");
             }
         }
 
-        long maxX = expandedGrid.keySet().stream().map(p -> p.x).max(Long::compare).get();
-        long maxY = expandedGrid.keySet().stream().map(p -> p.y).max(Long::compare).get();
+        long maxX = expandedGrid.keySet().stream().map(p -> p.x).max(Long::compare).orElse(-1L);
+        long maxY = expandedGrid.keySet().stream().map(p -> p.y).max(Long::compare).orElse(-1L);
+        assert maxX != -1 && maxY != -1;
 
         // Fill all the empty space in the new grid
         for (int y = 0; y <= maxY; y++) {
             for (int x = 0; x <= maxX; x++) {
-                String currVal = expandedGrid.getOrDefault(new Point(x, y), "_");
-                if ("_".equals(currVal)) {
-                    expandedGrid.put(new Point(x, y), "*");
+                String currVal = expandedGrid.getOrDefault(new Point(x, y), POSITION_IS_NOT_PART_OF_ORIGINAL_GRID);
+                if (POSITION_IS_NOT_PART_OF_ORIGINAL_GRID.equals(currVal)) {
+                    expandedGrid.put(new Point(x, y), POSITION_WAS_IN_ORIGINAL_GRID_VALUE);
                 }
             }
         }
-
-        long countCannotReachPerimeter = 0;
-        Set<Point> testedPoints = new HashSet<>();
-        for (Point point : grid.keySet()) {
-            System.out.println("testedPoints.size() = " + testedPoints.size());
-            Point expandedPoint = new Point(point.x * 2, point.y * 2);
-            // Skip points we've found already
-            if (testedPoints.contains(expandedPoint)) {
-                continue;
-            }
-            testedPoints.add(expandedPoint);
-            String currentValue = expandedGrid.get(expandedPoint);
-            if (!"#".equals(currentValue)) {
-                PerimeterSearchResult perimeterSearchResult = canReachPerimeter(expandedGrid, expandedPoint);
-
-
-                for (Point visitedPoint : perimeterSearchResult.visited) {
-                    String val = expandedGrid.get(visitedPoint);
-                    testedPoints.add(visitedPoint);
-                    if (perimeterSearchResult.canReach) {
-                        expandedGrid.put(visitedPoint, "O");
-                    } else {
-                        expandedGrid.put(visitedPoint, "I");
-                        if (!"*".equals(val)) {
-                            countCannotReachPerimeter += 1;
-                        }
-                    }
-                }
-            }
-        }
-
-        return countCannotReachPerimeter;
+        return expandedGrid;
     }
 
     record PerimeterSearchResult(boolean canReach, Set<Point> visited) {
@@ -181,10 +196,10 @@ public class Day10 {
             visited.add(current);
             List<Point> neighbors = List.of(current.up(), current.right(), current.down(), current.left());
             for (Point neighborLoc : neighbors) {
-                String neighborVal = grid.getOrDefault(neighborLoc, "_");
-                if ("_".equals(neighborVal) || "O".equals(neighborVal)) {
+                String neighborVal = grid.getOrDefault(neighborLoc, POSITION_IS_NOT_PART_OF_ORIGINAL_GRID);
+                if (POSITION_IS_NOT_PART_OF_ORIGINAL_GRID.equals(neighborVal) || POSITION_IS_OUTSIDE_PIPES_VALUE.equals(neighborVal)) {
                     return new PerimeterSearchResult(true, visited);
-                } else if ("#".equals(neighborVal) || "I".equals(neighborVal)) {
+                } else if (POSITION_IS_PIPE.equals(neighborVal) || POSITION_IS_INSIDE_PIPES_VALUE.equals(neighborVal)) {
                     // Dead end, don't append this point
                     continue;
                 } else {
