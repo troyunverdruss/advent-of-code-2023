@@ -165,8 +165,7 @@ struct Point {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-    use crate::day11::{dbg_print_grid, expand_universe, expand_universe_by_more_than_1, parse_lines_to_grid, Point, solve_part1, solve_part2};
+    use crate::day11::{dbg_print_grid, expand_universe, parse_lines_to_grid, solve_part1, solve_part2};
 
     #[test]
     fn test_expand_universe() {
