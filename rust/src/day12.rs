@@ -25,6 +25,7 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
     dbg!("depth: ", depth);
     dbg!(condition_record);
     let mut total_arrangements = 0;
+    let mut sub_arrangements = 0;
     // Are there any more check numbers? If not we're definitely done
     if condition_record.check_data.is_empty() {
         return total_arrangements;
@@ -54,17 +55,19 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
         if slice.contains(&'.') && found_possible_loc {
             break;
         }
+
         // Logically we should be at least at a starting location now
         // But only if the next field position is # or ? OR we're at the end
+
         let next_field_position = 1 + i + *check_number as usize;
-        let next_field_value =  condition_record.field.get(next_field_position);
+        let next_field_value = condition_record.field.get(next_field_position);
         if next_field_position >= condition_record.field.len()
             || next_field_value.unwrap() == &'#'
             || next_field_value.unwrap() == &'?' {
-
             dbg!("Incrementing, field pos: ", next_field_position);
             found_possible_loc = true;
-            total_arrangements +=1;
+            total_arrangements += 1;
+
 
             // For each field position it can *START*, pass the remaining sublist
             //   to this function again with the check data removed and only the
@@ -78,13 +81,13 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
                     .iter()
                     .map(|c| *c)
                     .collect();
-                total_arrangements += compute_arrangements(
-                    &ConditionRecord {
-                        field: field_new,
-                        check_data: check_data_new.clone(),
-                    },
-                    depth + 1
-                )
+                // total_arrangements += compute_arrangements(
+                //     &ConditionRecord {
+                //         field: field_new,
+                //         check_data: check_data_new.clone(),
+                //     },
+                //     depth + 1,
+                // );
             }
             // When no more check numbers exist and all permutations have been tested
             //   start returning
@@ -134,6 +137,28 @@ mod tests {
     }
 
     #[test]
+    fn test_base() {
+        let line = "# 1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 1)
+    }
+    #[test]
+    fn test_base_2() {
+        let line = "## 1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 2)
+    }
+    #[test]
+    fn test_base_3() {
+        let line = "### 1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 3)
+    }
+
+    #[test]
     fn test_simple_compute_arrangement_1() {
         let line = ".#?? 1,1";
         let record = ConditionRecord::parse_line_to_record(line);
@@ -143,7 +168,7 @@ mod tests {
 
     #[test]
     fn test_simple_compute_arrangement_2() {
-        let line = "##? 1";
+        let line = "??? 1,1";
         let record = ConditionRecord::parse_line_to_record(line);
         let arrangements = compute_arrangements(&record, 0);
         assert_eq!(arrangements, 1)
