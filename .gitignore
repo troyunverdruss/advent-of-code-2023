@@ -3,3 +3,4 @@ inputs
 .idea/workspace.xml
 java_kotlin/out/
 rust/target
+.venv

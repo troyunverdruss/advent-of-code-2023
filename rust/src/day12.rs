@@ -67,10 +67,24 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
             found_mandatory_start_pos = true;
         }
 
+        let slice_remainder = &condition_record.field[i + check_number..condition_record.field.len()];
+        let x = condition_record.field
+            .iter()
+            .map(|c| c.to_string())
+            .collect::<Vec<String>>()
+            .join("")
+            .split('.')
+            .collect::<Vec<&str>>()
+            .iter()
+            .filter(|s| s.contains("#"))
+            .count();
+        if x > condition_record.check_data.len() {
+            continue;
+        }
+
+
 
         if remaining_check_data.len() == 0 {
-            let slice_remainder = &condition_record.field[i + check_number..condition_record.field.len()];
-
             if !slice_remainder.contains(&'#') {
                 found_any_start = true;
                 arrangements += 1;
@@ -98,6 +112,11 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
         }
     }
     arrangements
+}
+
+fn can_fit_remainder(line: &str, check_data: &Vec<i64>) -> bool{
+    let parts = line.split('.').collect::<Vec<&str>>();
+    false
 }
 
 fn clone_sublist<T: Clone>(list: &Vec<T>, start: usize, end_exclusive: usize) -> Vec<T> {
@@ -343,6 +362,20 @@ mod tests {
         // .....#..##.###.
         // ......#.##.###.
         let line = ".??????.?#.?##. 1,2,3";
+        let record = ConditionRecord::parse_line_to_record(line);
+        assert_eq!(compute_arrangements(&record, 0), 6)
+    }
+
+    #[test]
+    fn test_more3() {
+        // .?????.#. 1,1,1
+        // .#.#...#.
+        // .#..#..#.
+        // .#...#.#.
+        // ..#.#..#.
+        // ..#..#.#.
+        // ...#.#.#.
+        let line = ".?????.?#. 1,1,2";
         let record = ConditionRecord::parse_line_to_record(line);
         assert_eq!(compute_arrangements(&record, 0), 6)
     }
