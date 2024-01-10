@@ -1,3 +1,4 @@
+use std::cmp::min;
 use crate::read_file_to_lines;
 
 pub fn part1() -> i64 {
@@ -22,23 +23,110 @@ fn solve_part1(lines: Vec<String>) -> i64 {
 }
 
 fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
+    dbg!(depth);
+    if condition_record.check_data.len() == 0
+        && condition_record.field.contains(&'#') {
+        panic!("got here 1");
+        return 0;
+    }
+    if condition_record.check_data.len() > 0
+        && condition_record.field.len() == 0 {
+        return 0;
+    }
+
+    let check_number = *condition_record.check_data.first().unwrap() as usize;
+    let remaining_check_data = clone_sublist(&condition_record.check_data, 1, condition_record.check_data.len());
+
+    if check_number > condition_record.field.len() {
+        return 0;
+    }
+
+    let mut arrangements = 0;
+    let mut possible_arrangements = 0;
+    let mut found_mandatory_start_pos = false;
+    let mut found_any_start = false;
+    for i in 0..=condition_record.field.len() - check_number {
+        println!("depth: {}, index: {}", depth, i);
+        let slice = &condition_record.field[i..i + check_number];
+        if found_mandatory_start_pos {
+            break;
+        }
+
+        if slice.contains(&'.') && found_any_start {
+            break;
+        }
+
+        if slice.contains(&'.') {
+            continue;
+        }
+
+        if slice.get(0).unwrap() == &'#' {
+            found_mandatory_start_pos = true;
+        }
+
+        found_any_start = true;
+        if remaining_check_data.len() == 0 {
+            let slice_remainder = &condition_record.field[i + check_number..condition_record.field.len()];
+
+            if !slice_remainder.contains(&'#') {
+                arrangements += 1;
+            }
+        } else {
+            // recurse
+
+            let sub_arrangements = compute_arrangements(&ConditionRecord {
+                field: clone_sublist(&condition_record.field, 1 + i + check_number, condition_record.field.len()),
+                check_data: remaining_check_data.clone(),
+            }, depth + 1);
+            if sub_arrangements > 0 {
+                possible_arrangements += 1;
+                arrangements += sub_arrangements;
+            }
+        }
+    }
+    arrangements
+}
+
+fn clone_sublist<T: Clone>(list: &Vec<T>, start: usize, end_exclusive: usize) -> Vec<T> {
+    let actual_end = min(end_exclusive, list.len());
+    if start >= actual_end {
+        vec![]
+    } else {
+        list[start..actual_end]
+            .iter()
+            .map(|v: &T| v.clone())
+            .collect()
+    }
+}
+
+fn get_or_default<T: Clone>(list: &Vec<T>, index: usize, default: T) -> T {
+    let opt = list.get(index);
+    match opt {
+        None => { default }
+        Some(v) => { v.clone() }
+    }
+}
+
+fn compute_arrangements1(condition_record: &ConditionRecord, depth: i64) -> i64 {
     dbg!("depth: ", depth);
     dbg!(condition_record);
     let mut total_arrangements = 0;
-    let mut sub_arrangements = 0;
-    // Are there any more check numbers? If not we're definitely done
-    if condition_record.check_data.is_empty() {
-        return total_arrangements;
-    }
+    // // Are there any more check numbers? If not we're definitely done
+    //
+    // if condition_record.check_data.is_empty() {
+    //     return total_arrangements;
+    // }
 
-    // Get the first check data number
+    // Get the next check data number
     let check_number = condition_record.check_data.get(0).unwrap();
 
-    let check_data_new: Vec<i64> = condition_record
-        .check_data[1..condition_record.check_data.len()]
-        .iter()
-        .map(|v| *v)
-        .collect();
+    let check_data_new: Vec<i64> = clone_sublist(&condition_record.check_data, 1, condition_record.check_data.len());
+
+    // condition_record
+    // .check_data[1..condition_record.check_data.len()]
+    // .iter()
+    // .map(|v| *v)
+    // .collect();
 
 
     // Find/go through all the field positions to figure out where it can go
@@ -143,27 +231,53 @@ mod tests {
         let arrangements = compute_arrangements(&record, 0);
         assert_eq!(arrangements, 1)
     }
+
     #[test]
     fn test_base_2() {
         let line = "## 1";
         let record = ConditionRecord::parse_line_to_record(line);
         let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 0)
+    }
+
+    #[test]
+    fn test_base_2_with_1_wild() {
+        let line = "#? 1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 1)
+    }
+
+    #[test]
+    fn test_base_2_with_2_wild() {
+        let line = "?? 1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
         assert_eq!(arrangements, 2)
     }
+
     #[test]
-    fn test_base_3() {
+    fn test_base_3_will_fail() {
         let line = "### 1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 0)
+    }
+
+    #[test]
+    fn test_base_3_will_pass() {
+        let line = "??? 1";
         let record = ConditionRecord::parse_line_to_record(line);
         let arrangements = compute_arrangements(&record, 0);
         assert_eq!(arrangements, 3)
     }
 
     #[test]
-    fn test_simple_compute_arrangement_1() {
-        let line = ".#?? 1,1";
+    fn test_recurse_1_no_fit() {
+        let line = "#.## 1,1";
         let record = ConditionRecord::parse_line_to_record(line);
         let arrangements = compute_arrangements(&record, 0);
-        assert_eq!(arrangements, 1)
+        assert_eq!(arrangements, 0)
     }
 
     #[test]
@@ -175,19 +289,68 @@ mod tests {
     }
 
     #[test]
+    fn test_simple_compute_arrangement_2_with_fixed_front() {
+        let line = "##.?? 2,1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 2)
+    }
+
+    #[test]
+    fn test_simple_compute_arrangement_2_with_fixed_end() {
+        let line = "??.## 1,2";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 2)
+    }
+
+    #[test]
+    fn test_all_wild() {
+        // #.##.
+        // #..##
+        // .#.##
+        let line = "????? 1,2";
+        let record = ConditionRecord::parse_line_to_record(line);
+        let arrangements = compute_arrangements(&record, 0);
+        assert_eq!(arrangements, 3)
+    }
+
+    #[test]
     fn test_part1_example_records() {
         let lines = vec![
             "???.### 1,1,3",
             ".??..??...?##. 1,1,3",
-            "?#?#?#?#?#?#?#? 1,3,1,6",
+            // "?#?#?#?#?#?#?#? 1,3,1,6",
             "????.#...#... 4,1,1",
             "????.######..#####. 1,6,5",
-            "?###???????? 3,2,1",
+            // "?###???????? 3,2,1",
         ];
-        let expected_results = vec![1, 4, 1, 1, 4, 10];
+        let expected_results = vec![
+            1,
+            4,
+            // 1,
+            1,
+            4,
+            // 10,
+        ];
         for (idx, line) in enumerate(lines) {
+            println!("Testing index: {}", idx);
             let record = ConditionRecord::parse_line_to_record(line);
             assert_eq!(compute_arrangements(&record, 0), *expected_results.get(idx).unwrap())
         }
+    }
+
+    #[test]
+    fn test_part1_example_problem_record1() {
+        let line = "?#?#?#?#?#?#?#? 1,3,1,6";
+        let record = ConditionRecord::parse_line_to_record(line);
+        assert_eq!(compute_arrangements(&record, 0), 1)
+    }
+
+    #[test]
+    fn test_part1_example_problem_record2() {
+        let line = "?###???????? 3,2,1";
+        let record = ConditionRecord::parse_line_to_record(line);
+        assert_eq!(compute_arrangements(&record, 0), 10)
     }
 }
