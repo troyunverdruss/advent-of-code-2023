@@ -7,7 +7,5 @@
   <component name="MavenProjectsManager">
     <option name="workspaceImportForciblyTurnedOn" value="true" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="openjdk-21" project-jdk-type="JavaSDK">
-    <output url="file://$PROJECT_DIR$/java_kotlin/out" />
-  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (advent-of-code-2023)" project-jdk-type="Python SDK" />
 </project>

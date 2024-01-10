@@ -1,4 +1,5 @@
-use std::cmp::min;
+use std::cmp::{max, min};
+use std::thread::current;
 use crate::read_file_to_lines;
 
 pub fn part1() -> i64 {
@@ -27,6 +28,99 @@ fn solve_part1(lines: Vec<String>) -> i64 {
 }
 
 fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
+    let mut result = 0;
+    if condition_record.check_data.len() == 0 {
+        let field_has_required = condition_record.field.contains(&'#');
+        return if field_has_required {
+            0
+        } else {
+            1
+        };
+    }
+    let check_number = *condition_record.check_data.first().unwrap();
+    let remaining_check_data = clone_sublist(&condition_record.check_data, 1, 1_000_000);
+
+    let range_end: i64 = condition_record.field.len() as i64
+        - remaining_check_data.iter().sum::<i64>()
+        - remaining_check_data.len() as i64
+        - check_number
+        + 1;
+
+    let range_end = max(0, range_end) as usize;
+    for i in 0..range_end {
+        let slice = &condition_record.field[0..i];
+        if slice.contains(&'#') {
+            break;
+        }
+        let nxt = i + check_number as usize;
+        if nxt <= condition_record.field.len() {
+            if !&condition_record.field[i..nxt].contains(&'.') {
+                let is_at_end = nxt + 1 > condition_record.field.len();
+                if is_at_end || !&condition_record.field[nxt..nxt + 1].contains(&'#') {
+                    result += compute_arrangements(
+                        &ConditionRecord {
+                            field: clone_sublist(&condition_record.field, nxt + 1, 1_000_000),
+                            check_data: remaining_check_data.clone(),
+                        },
+                        depth + 1,
+                    );
+                }
+            }
+        }
+    }
+
+    result
+}
+
+fn compute_arrangements3(condition_record: &ConditionRecord, depth: i64) -> i64 {
+    let mut result = 0;
+    if condition_record.check_data.len() == 0 {
+        return if condition_record.field.contains(&'#') {
+            0
+        } else {
+            1
+        };
+    }
+
+    let check_number = *condition_record.check_data.first().unwrap() as usize;
+    let remaining_check_data = clone_sublist(&condition_record.check_data, 1, condition_record.check_data.len());
+
+    let sum_check_data: i64 = condition_record.check_data.iter().map(|v| *v).sum::<i64>();
+    let range_limiter: i64 = sum_check_data
+        + condition_record.check_data.len() as i64
+        + check_number as i64;
+
+
+    let range_end = max(0, 1 + condition_record.field.len() as i64 - range_limiter);
+
+    // let range_end = condition_record.field.len()
+    //     - sum_check_data
+    //     - condition_record.check_data.len()
+    //     - check_number
+    //     + 1;
+    for i in 0..range_end as usize {
+        if &true == &condition_record.field[0..i].contains(&'#') {
+            break;
+        }
+        let next = i + check_number;
+        if next <= condition_record.field.len() {
+            if !&condition_record.field[i..next].contains(&'.') {
+                if !&condition_record.field[next..next + 1].contains(&'#') {
+                    result += compute_arrangements(
+                        &ConditionRecord {
+                            field: clone_sublist(&condition_record.field, next + 1, condition_record.field.len()),
+                            check_data: remaining_check_data.clone(),
+                        }
+                        , depth + 1);
+                }
+            }
+        }
+    }
+
+    result
+}
+
+fn compute_arrangements2(condition_record: &ConditionRecord, depth: i64) -> i64 {
     dbg!(depth);
     if condition_record.check_data.len() == 0
         && condition_record.field.contains(&'#') {
@@ -83,7 +177,6 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
         }
 
 
-
         if remaining_check_data.len() == 0 {
             if !slice_remainder.contains(&'#') {
                 found_any_start = true;
@@ -114,7 +207,7 @@ fn compute_arrangements(condition_record: &ConditionRecord, depth: i64) -> i64 {
     arrangements
 }
 
-fn can_fit_remainder(line: &str, check_data: &Vec<i64>) -> bool{
+fn can_fit_remainder(line: &str, check_data: &Vec<i64>) -> bool {
     let parts = line.split('.').collect::<Vec<&str>>();
     false
 }
