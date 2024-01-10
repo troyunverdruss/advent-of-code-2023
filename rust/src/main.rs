@@ -5,13 +5,14 @@ mod day11;
 mod day12;
 
 fn main() {
-    println!("Day 11");
-    println!("{}", day11::part1());
-    println!("{}", day11::part2());
+    // println!("Day 11");
+    // println!("{}", day11::part1());
+    // println!("{}", day11::part2());
 
     println!("Day 12");
     println!("{}", day12::part1());
-    println!("{}", day12::part2());
+    // too low: 6441, 7481
+    // println!("{}", day12::part2());
 }
 
 fn read_file_to_lines(path: &str) -> Vec<String> {
