@@ -1,4 +1,5 @@
 use std::cmp::{max, min};
+use itertools::Itertools;
 use memoize::memoize;
 
 use crate::read_file_to_lines;
@@ -13,7 +14,12 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-    todo!("part 2 not done")
+    let lines = read_file_to_lines("inputs/day12.txt")
+        .iter()
+        .filter(|l| !l.is_empty())
+        .map(|l| l.clone())
+        .collect();
+    solve_part2(lines)
 }
 
 fn solve_part1(lines: Vec<String>) -> i64 {
@@ -27,6 +33,19 @@ fn solve_part1(lines: Vec<String>) -> i64 {
         .map(|cr| compute_arrangements(cr.clone(), 0))
         .sum()
 }
+
+fn solve_part2(lines: Vec<String>) -> i64 {
+    let condition_records: Vec<ConditionRecord> = lines
+        .iter()
+        .map(|l| ConditionRecord::parse_line_to_record(l))
+        .collect();
+
+    condition_records
+        .iter()
+        .map(|cr| compute_arrangements(cr.expand_for_part2(), 0))
+        .sum()
+}
+
 #[memoize]
 fn compute_arrangements(condition_record: ConditionRecord, depth: i64) -> i64 {
     let mut result = 0;
@@ -256,12 +275,25 @@ impl ConditionRecord {
 
         ConditionRecord { field, check_data }
     }
+
+    fn expand_for_part2(&self) -> ConditionRecord {
+        let field_str = self.field.iter().map(|c| c.to_string()).join("");
+        let check_data_str = self.check_data.iter().join(",").to_string();
+
+        let long_field_str = format!("{}?{}?{}?{}?{}", field_str, field_str, field_str, field_str, field_str);
+        let long_check_data_str = format!("{},{},{},{},{}", check_data_str, check_data_str, check_data_str, check_data_str, check_data_str);
+
+        ConditionRecord {
+            field: long_field_str.chars().collect(),
+            check_data:long_check_data_str.split(",").map(|i| i.parse::<i64>().unwrap()).collect(),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use itertools::enumerate;
-    use crate::day12::{compute_arrangements, ConditionRecord, solve_part1};
+    use crate::day12::{compute_arrangements, ConditionRecord, solve_part1, solve_part2};
 
     #[test]
     fn test_parse() {
@@ -416,6 +448,18 @@ mod tests {
             "?###???????? 3,2,1".to_string(),
         ];
         assert_eq!(solve_part1(lines), 21);
+    }
+    #[test]
+    fn test_solve_part2() {
+        let lines = vec![
+            "???.### 1,1,3".to_string(),
+            ".??..??...?##. 1,1,3".to_string(),
+            "?#?#?#?#?#?#?#? 1,3,1,6".to_string(),
+            "????.#...#... 4,1,1".to_string(),
+            "????.######..#####. 1,6,5".to_string(),
+            "?###???????? 3,2,1".to_string(),
+        ];
+        assert_eq!(solve_part2(lines), 525152);
     }
 
     #[test]

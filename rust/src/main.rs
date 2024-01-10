@@ -11,8 +11,7 @@ fn main() {
 
     println!("Day 12");
     println!("{}", day12::part1());
-    // too low: 6441, 7481
-    // println!("{}", day12::part2());
+    println!("{}", day12::part2());
 }
 
 fn read_file_to_lines(path: &str) -> Vec<String> {
