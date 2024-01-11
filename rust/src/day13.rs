@@ -1,5 +1,6 @@
 use std::cmp::min;
 use crate::day11::{grid_to_lines, parse_lines_to_grid, rotate_grid};
+use crate::day13::Dir::{HORIZONTAL, VERTICAL};
 use crate::read_file_to_lines;
 
 pub fn part1() -> i64 {
@@ -12,18 +13,35 @@ fn solve_part1(line_groups: Vec<Vec<String>>) -> i64 {
     line_groups
         .iter()
         .filter(|v| v.len() != 0)
-        .map(|l| find_mirroring_score(l))
+        .map(|l| find_mirroring_data(l))
+        .map(|md| match md.dir {
+            HORIZONTAL => 100 * md.num_row_col,
+            VERTICAL => md.num_row_col
+        })
         .sum()
 }
 
-fn find_mirroring_score(lines: &Vec<String>) -> i64 {
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+enum Dir {
+    HORIZONTAL,
+    VERTICAL,
+}
+
+#[derive(Hash, Eq, PartialEq, Clone, Debug)]
+struct MirrorData {
+    dir: Dir,
+    num_row_col: i64,
+}
+
+fn find_mirroring_data(lines: &Vec<String>) -> MirrorData {
     // Scan for horizontal mirroring
     // If there's mirroring, count lines before axis
 
     let (h_mirroring, rows) = check_for_horizontal_mirroring(lines, 0);
     if h_mirroring {
         // dbg!(100 * rows);
-        return 100 * rows;
+        // return 100 * rows;
+        return MirrorData { dir: HORIZONTAL, num_row_col: rows };
     }
 
     // Then rotate the lines
@@ -34,7 +52,8 @@ fn find_mirroring_score(lines: &Vec<String>) -> i64 {
     let (v_mirroring, v_rows) = check_for_horizontal_mirroring(&v_lines, 0);
     if v_mirroring {
         // dbg!(v_rows);
-        return v_rows;
+        // return v_rows;
+        return MirrorData { dir: VERTICAL, num_row_col: v_rows };
     }
 
     panic!("unable to find mirroring!")
@@ -98,7 +117,6 @@ fn parse_lines_line_groupings(lines: &Vec<String>) -> Vec<Vec<String>> {
 
     let mut line_group = Vec::new();
     for line in lines {
-
         if line.is_empty() {
             line_groupings.push(line_group.clone());
             line_group.clear()
@@ -113,7 +131,8 @@ fn parse_lines_line_groupings(lines: &Vec<String>) -> Vec<Vec<String>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::day13::{find_mirroring_score, parse_lines_line_groupings, solve_part1};
+    use crate::day13::{find_mirroring_data, MirrorData, parse_lines_line_groupings, solve_part1};
+    use crate::day13::Dir::{HORIZONTAL, VERTICAL};
 
     #[test]
     fn test_horizontal_mirror() {
@@ -126,7 +145,7 @@ mod tests {
             "..##..###".to_string(),
             "#....#..#".to_string(),
         ];
-        assert_eq!(find_mirroring_score(&lines), 400);
+        assert_eq!(find_mirroring_data(&lines), MirrorData { dir: HORIZONTAL, num_row_col: 4 });
     }
 
     #[test]
@@ -140,7 +159,7 @@ mod tests {
             "..##..##.".to_string(),
             "#.#.##.#.".to_string(),
         ];
-        assert_eq!(find_mirroring_score(&lines), 5);
+        assert_eq!(find_mirroring_data(&lines), MirrorData { dir: VERTICAL, num_row_col: 5 });
     }
 
     #[test]
@@ -165,6 +184,4 @@ mod tests {
         let line_groups = parse_lines_line_groupings(&lines);
         assert_eq!(solve_part1(line_groups), 405)
     }
-
-
 }
