@@ -98,7 +98,7 @@ fn expand_universe(universe: &Vec<String>) -> HashMap<Point, char> {
     rotate_grid(&parse_lines_to_grid(&expanded_rotated_xy))
 }
 
-fn grid_to_lines(grid: &HashMap<Point, char>) -> Vec<String> {
+pub fn grid_to_lines(grid: &HashMap<Point, char>) -> Vec<String> {
     let max_x = grid.iter().map(|(k, _)| k.x).max().unwrap();
     let max_y = grid.iter().map(|(k, _)| k.y).max().unwrap();
 
@@ -124,13 +124,13 @@ fn expand_vertically(universe: &Vec<String>) -> Vec<String> {
     expanded_y
 }
 
-fn rotate_grid(grid: &HashMap<Point, char>) -> HashMap<Point, char> {
+pub fn rotate_grid(grid: &HashMap<Point, char>) -> HashMap<Point, char> {
     grid.iter()
         .map(|(p, c)| (Point { x: p.y, y: p.x }, c.clone()))
         .collect()
 }
 
-fn parse_lines_to_grid(lines: &Vec<String>) -> HashMap<Point, char> {
+pub fn parse_lines_to_grid(lines: &Vec<String>) -> HashMap<Point, char> {
     let mut grid = HashMap::new();
     let mut y = 0;
     for line in lines {
@@ -158,7 +158,7 @@ fn dbg_print_grid(grid: &HashMap<Point, char>) {
 }
 
 #[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
-struct Point {
+pub struct Point {
     x: i64,
     y: i64,
 }

@@ -92,145 +92,6 @@ fn compute_arrangements(condition_record: ConditionRecord, depth: i64) -> i64 {
     result
 }
 
-fn compute_arrangements3(condition_record: &ConditionRecord, depth: i64) -> i64 {
-    let mut result = 0;
-    if condition_record.check_data.len() == 0 {
-        return if condition_record.field.contains(&'#') {
-            0
-        } else {
-            1
-        };
-    }
-
-    let check_number = *condition_record.check_data.first().unwrap() as usize;
-    let remaining_check_data = clone_sublist(&condition_record.check_data, 1, condition_record.check_data.len());
-
-    let sum_check_data: i64 = condition_record.check_data.iter().map(|v| *v).sum::<i64>();
-    let range_limiter: i64 = sum_check_data
-        + condition_record.check_data.len() as i64
-        + check_number as i64;
-
-
-    let range_end = max(0, 1 + condition_record.field.len() as i64 - range_limiter);
-
-    // let range_end = condition_record.field.len()
-    //     - sum_check_data
-    //     - condition_record.check_data.len()
-    //     - check_number
-    //     + 1;
-    for i in 0..range_end as usize {
-        if &true == &condition_record.field[0..i].contains(&'#') {
-            break;
-        }
-        let next = i + check_number;
-        if next <= condition_record.field.len() {
-            if !&condition_record.field[i..next].contains(&'.') {
-                if !&condition_record.field[next..next + 1].contains(&'#') {
-                    result += compute_arrangements3(
-                        &ConditionRecord {
-                            field: clone_sublist(&condition_record.field, next + 1, condition_record.field.len()),
-                            check_data: remaining_check_data.clone(),
-                        }
-                        , depth + 1);
-                }
-            }
-        }
-    }
-
-    result
-}
-
-fn compute_arrangements2(condition_record: &ConditionRecord, depth: i64) -> i64 {
-    dbg!(depth);
-    if condition_record.check_data.len() == 0
-        && condition_record.field.contains(&'#') {
-        panic!("got here 1");
-        return 0;
-    }
-    if condition_record.check_data.len() > 0
-        && condition_record.field.len() == 0 {
-        return 0;
-    }
-
-    let check_number = *condition_record.check_data.first().unwrap() as usize;
-    let remaining_check_data = clone_sublist(&condition_record.check_data, 1, condition_record.check_data.len());
-
-    if check_number > condition_record.field.len() {
-        return 0;
-    }
-
-    let mut arrangements = 0;
-    let mut found_mandatory_start_pos = false;
-    let mut found_any_start = false;
-    for i in 0..=condition_record.field.len() - check_number {
-        // println!("depth: {}, index: {}", depth, i);
-        let slice = &condition_record.field[i..i + check_number];
-        if found_mandatory_start_pos {
-            break;
-        }
-
-        if slice.contains(&'.') && found_any_start {
-            break;
-        }
-
-        if slice.contains(&'.') {
-            continue;
-        }
-
-        if slice.get(0).unwrap() == &'#' {
-            found_mandatory_start_pos = true;
-        }
-
-        let slice_remainder = &condition_record.field[i + check_number..condition_record.field.len()];
-        let x = condition_record.field
-            .iter()
-            .map(|c| c.to_string())
-            .collect::<Vec<String>>()
-            .join("")
-            .split('.')
-            .collect::<Vec<&str>>()
-            .iter()
-            .filter(|s| s.contains("#"))
-            .count();
-        if x > condition_record.check_data.len() {
-            continue;
-        }
-
-
-        if remaining_check_data.len() == 0 {
-            if !slice_remainder.contains(&'#') {
-                found_any_start = true;
-                arrangements += 1;
-            }
-        } else {
-            // recurse
-            // can only recurse if first field after our tested slice is ? or .
-            let next_field = condition_record.field.get(i + check_number);
-            match next_field {
-                None => {}
-                Some(v) => {
-                    if v == &'#' {
-                        continue;
-                    }
-                }
-            }
-
-            let sub_arrangements = compute_arrangements2(&ConditionRecord {
-                field: clone_sublist(&condition_record.field, 1 + i + check_number, condition_record.field.len()),
-                check_data: remaining_check_data.clone(),
-            }, depth + 1);
-            if sub_arrangements > 0 {
-                arrangements += sub_arrangements;
-            }
-        }
-    }
-    arrangements
-}
-
-fn can_fit_remainder(line: &str, check_data: &Vec<i64>) -> bool {
-    let parts = line.split('.').collect::<Vec<&str>>();
-    false
-}
 
 fn clone_sublist<T: Clone>(list: &Vec<T>, start: usize, end_exclusive: usize) -> Vec<T> {
     let actual_end = min(end_exclusive, list.len());
@@ -285,7 +146,7 @@ impl ConditionRecord {
 
         ConditionRecord {
             field: long_field_str.chars().collect(),
-            check_data:long_check_data_str.split(",").map(|i| i.parse::<i64>().unwrap()).collect(),
+            check_data: long_check_data_str.split(",").map(|i| i.parse::<i64>().unwrap()).collect(),
         }
     }
 }
@@ -449,6 +310,7 @@ mod tests {
         ];
         assert_eq!(solve_part1(lines), 21);
     }
+
     #[test]
     fn test_solve_part2() {
         let lines = vec![
