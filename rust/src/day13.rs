@@ -9,11 +9,38 @@ pub fn part1() -> i64 {
     solve_part1(line_groups)
 }
 
+pub fn part2() -> i64 {
+    let lines = read_file_to_lines("inputs/day13.txt");
+    let line_groups: Vec<Vec<String>> = parse_lines_line_groupings(&lines);
+    solve_part2(line_groups)
+}
+
 fn solve_part1(line_groups: Vec<Vec<String>>) -> i64 {
     line_groups
         .iter()
         .filter(|v| v.len() != 0)
-        .map(|l| find_mirroring_data(l))
+        .map(|l| find_mirroring_data(l, 0, None))
+        .map(|md| match md.dir {
+            HORIZONTAL => 100 * md.num_row_col,
+            VERTICAL => md.num_row_col
+        })
+        .sum()
+}
+
+fn solve_part2(line_groups: Vec<Vec<String>>) -> i64 {
+    let part1_mirror_data: Vec<MirrorData> = line_groups
+        .iter()
+        .filter(|v| v.len() != 0)
+        .map(|l| find_mirroring_data(l, 0, None))
+        .collect();
+
+    line_groups
+        .iter()
+        .enumerate()
+        .filter(|(_, v)| v.len() != 0)
+        .map(|(idx, l)| {
+            find_mirroring_data(l, 1, Some(part1_mirror_data.get(idx).unwrap().clone()))
+        })
         .map(|md| match md.dir {
             HORIZONTAL => 100 * md.num_row_col,
             VERTICAL => md.num_row_col
@@ -33,11 +60,23 @@ struct MirrorData {
     num_row_col: i64,
 }
 
-fn find_mirroring_data(lines: &Vec<String>) -> MirrorData {
+fn find_mirroring_data(lines: &Vec<String>, max_permitted_diffs: i64, disallowed_mirror: Option<MirrorData>) -> MirrorData {
     // Scan for horizontal mirroring
     // If there's mirroring, count lines before axis
 
-    let (h_mirroring, rows) = check_for_horizontal_mirroring(lines, 0);
+    let h_disallowed_mirror = match &disallowed_mirror {
+        None => None,
+        Some(md) => if md.dir == HORIZONTAL {
+            Some(md.num_row_col)
+        } else {
+            None
+        }
+    };
+    let (h_mirroring, rows) = check_for_horizontal_mirroring(
+        lines,
+        max_permitted_diffs,
+        h_disallowed_mirror,
+    );
     if h_mirroring {
         // dbg!(100 * rows);
         // return 100 * rows;
@@ -49,7 +88,19 @@ fn find_mirroring_data(lines: &Vec<String>) -> MirrorData {
     let rotated_grid = rotate_grid(&grid);
     let v_lines = grid_to_lines(&rotated_grid);
 
-    let (v_mirroring, v_rows) = check_for_horizontal_mirroring(&v_lines, 0);
+    let v_disallowed_mirror = match &disallowed_mirror {
+        None => None,
+        Some(md) => if md.dir == VERTICAL {
+            Some(md.num_row_col)
+        } else {
+            None
+        }
+    };
+    let (v_mirroring, v_rows) = check_for_horizontal_mirroring(
+        &v_lines,
+        max_permitted_diffs,
+        v_disallowed_mirror,
+    );
     if v_mirroring {
         // dbg!(v_rows);
         // return v_rows;
@@ -59,7 +110,7 @@ fn find_mirroring_data(lines: &Vec<String>) -> MirrorData {
     panic!("unable to find mirroring!")
 }
 
-fn check_for_horizontal_mirroring(lines: &Vec<String>, max_permitted_diff: i64) -> (bool, i64) {
+fn check_for_horizontal_mirroring(lines: &Vec<String>, max_permitted_diff: i64, disallowed_mirror_row_count: Option<i64>) -> (bool, i64) {
     let h_line_count = lines.len();
     let mut h_mirroring = false;
     let mut h_rows_before = -1;
@@ -67,7 +118,7 @@ fn check_for_horizontal_mirroring(lines: &Vec<String>, max_permitted_diff: i64) 
         let mut mirroring = true;
         let mut total_diffs = count_diffs(lines.get(i).unwrap(), lines.get(i + 1).unwrap());
 
-        if total_diffs <= max_permitted_diff {
+        if total_diffs <= max_permitted_diff && Some((i + 1) as i64) != disallowed_mirror_row_count {
             let steps = min(i, h_line_count - i - 2);
             for j in 0..steps {
                 total_diffs += count_diffs(lines.get(i - 1 - j).unwrap(), lines.get(i + 2 + j).unwrap());
@@ -131,11 +182,11 @@ fn parse_lines_line_groupings(lines: &Vec<String>) -> Vec<Vec<String>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::day13::{find_mirroring_data, MirrorData, parse_lines_line_groupings, solve_part1};
+    use crate::day13::{find_mirroring_data, MirrorData, parse_lines_line_groupings, solve_part1, solve_part2};
     use crate::day13::Dir::{HORIZONTAL, VERTICAL};
 
     #[test]
-    fn test_horizontal_mirror() {
+    fn test_pattern1_horizontal_mirror() {
         let lines = vec![
             "#...##..#".to_string(),
             "#....#..#".to_string(),
@@ -145,11 +196,32 @@ mod tests {
             "..##..###".to_string(),
             "#....#..#".to_string(),
         ];
-        assert_eq!(find_mirroring_data(&lines), MirrorData { dir: HORIZONTAL, num_row_col: 4 });
+        assert_eq!(find_mirroring_data(&lines, 0, None), MirrorData { dir: HORIZONTAL, num_row_col: 4 });
     }
 
     #[test]
-    fn test_vertical_mirror() {
+    fn test_pattern1_horizontal_mirror_part2() {
+        let lines = vec![
+            "#...##..#".to_string(),
+            "#....#..#".to_string(),
+            "..##..###".to_string(),
+            "#####.##.".to_string(),
+            "#####.##.".to_string(),
+            "..##..###".to_string(),
+            "#....#..#".to_string(),
+        ];
+        let part1_md = MirrorData { dir: HORIZONTAL, num_row_col: 4 };
+        assert_eq!(
+            find_mirroring_data(
+                &lines,
+                1,
+                Some(part1_md),
+            ),
+            MirrorData { dir: HORIZONTAL, num_row_col: 1 });
+    }
+
+    #[test]
+    fn test_pattern2_vertical_mirror() {
         let lines = vec![
             "#.##..##.".to_string(),
             "..#.##.#.".to_string(),
@@ -159,7 +231,29 @@ mod tests {
             "..##..##.".to_string(),
             "#.#.##.#.".to_string(),
         ];
-        assert_eq!(find_mirroring_data(&lines), MirrorData { dir: VERTICAL, num_row_col: 5 });
+        assert_eq!(find_mirroring_data(&lines, 0, None), MirrorData { dir: VERTICAL, num_row_col: 5 });
+    }
+
+    #[test]
+    fn test_pattern2_now_horizontal_mirror_part2() {
+        let lines = vec![
+            "#.##..##.".to_string(),
+            "..#.##.#.".to_string(),
+            "##......#".to_string(),
+            "##......#".to_string(),
+            "..#.##.#.".to_string(),
+            "..##..##.".to_string(),
+            "#.#.##.#.".to_string(),
+        ];
+        let part1_md = MirrorData { dir: VERTICAL, num_row_col: 5 };
+        assert_eq!(
+            find_mirroring_data(
+                &lines,
+                1,
+                Some(part1_md),
+            ),
+            MirrorData { dir: HORIZONTAL, num_row_col: 3 }
+        );
     }
 
     #[test]
@@ -183,5 +277,28 @@ mod tests {
         ];
         let line_groups = parse_lines_line_groupings(&lines);
         assert_eq!(solve_part1(line_groups), 405)
+    }
+
+    #[test]
+    fn test_full_example_part_2() {
+        let lines = vec![
+            "#.##..##.".to_string(),
+            "..#.##.#.".to_string(),
+            "##......#".to_string(),
+            "##......#".to_string(),
+            "..#.##.#.".to_string(),
+            "..##..##.".to_string(),
+            "#.#.##.#.".to_string(),
+            "".to_string(),
+            "#...##..#".to_string(),
+            "#....#..#".to_string(),
+            "..##..###".to_string(),
+            "#####.##.".to_string(),
+            "#####.##.".to_string(),
+            "..##..###".to_string(),
+            "#....#..#".to_string(),
+        ];
+        let line_groups = parse_lines_line_groupings(&lines);
+        assert_eq!(solve_part2(line_groups), 400)
     }
 }
