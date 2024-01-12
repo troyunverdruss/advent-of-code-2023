@@ -82,7 +82,7 @@ pub fn dbg_print_grid(grid: &HashMap<Point, char>) {
 
     for y in 0..=max_y {
         for x in 0..=max_x {
-            print!("{}", grid.get(&Point { x, y }).unwrap());
+            print!("{}", grid.get(&Point { x, y }).unwrap_or(&'.'));
         }
         println!()
     }

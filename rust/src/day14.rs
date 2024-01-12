@@ -1,13 +1,23 @@
 use std::collections::HashMap;
 use itertools::Itertools;
 use crate::{parse_lines_to_grid, Point, read_file_to_lines};
-use crate::day14::Direction::North;
+use crate::day14::Direction::{East, North, South, West};
 
 pub fn part1() -> i64 {
     let lines = read_file_to_lines("inputs/day14.txt");
-    let grid  = parse_lines_to_grid(&lines);
+    let grid = parse_lines_to_grid(&lines);
     let tilted_grid = tilt(&grid, North);
-    compute_load(&tilted_grid, North)
+    compute_load(&tilted_grid)
+}
+
+
+fn cycle(grid: &HashMap<Point, char>) -> HashMap<Point, char> {
+    let titled_grid = tilt(&grid, North);
+    let titled_grid = tilt(&titled_grid, West);
+    let titled_grid = tilt(&titled_grid, South);
+    let titled_grid = tilt(&titled_grid, East);
+
+    titled_grid
 }
 
 fn tilt(grid: &HashMap<Point, char>, dir: Direction) -> HashMap<Point, char> {
@@ -20,19 +30,24 @@ fn tilt(grid: &HashMap<Point, char>, dir: Direction) -> HashMap<Point, char> {
     let rolling_stones: Vec<&Point> = grid
         .iter()
         .filter(|(_, v)| v == &&'O')
-        .sorted_by_key(|(k, _)| (k.y, k.x))
+        .sorted_by_key(|(k, _)| match dir {
+            North => (k.y, k.x),
+            East => (-k.x, k.y),
+            South => (-k.y, k.x),
+            West => (k.x, k.y),
+        })
         .map(|(k, _)| k)
         .collect();
 
     let limit = match dir {
-        Direction::North => 0,
-        Direction::East => todo!(),
-        Direction::South => todo!(),
-        Direction::West => todo!(),
+        North => 0,
+        East => grid.keys().map(|k| k.x).max().unwrap(),
+        South => grid.keys().map(|k| k.y).max().unwrap(),
+        West => 0,
     };
     for stone in rolling_stones {
         match dir {
-            Direction::North => {
+            North => {
                 let mut curr_pos = stone.clone();
                 let mut next_pos = curr_pos + dir.point_vec();
                 let mut next_pos_val = tilted_grid.get(&next_pos);
@@ -43,8 +58,38 @@ fn tilt(grid: &HashMap<Point, char>, dir: Direction) -> HashMap<Point, char> {
                 }
                 tilted_grid.insert(curr_pos, 'O');
             }
-            Direction::South | Direction::East | Direction::West => {
-                todo!()
+            South => {
+                let mut curr_pos = stone.clone();
+                let mut next_pos = curr_pos + dir.point_vec();
+                let mut next_pos_val = tilted_grid.get(&next_pos);
+                while next_pos.y <= limit && next_pos_val.unwrap_or(&'.') == &'.' {
+                    curr_pos = next_pos;
+                    next_pos = curr_pos + dir.point_vec();
+                    next_pos_val = tilted_grid.get(&next_pos);
+                }
+                tilted_grid.insert(curr_pos, 'O');
+            }
+            West => {
+                let mut curr_pos = stone.clone();
+                let mut next_pos = curr_pos + dir.point_vec();
+                let mut next_pos_val = tilted_grid.get(&next_pos);
+                while next_pos.x >= limit && next_pos_val.unwrap_or(&'.') == &'.' {
+                    curr_pos = next_pos;
+                    next_pos = curr_pos + dir.point_vec();
+                    next_pos_val = tilted_grid.get(&next_pos);
+                }
+                tilted_grid.insert(curr_pos, 'O');
+            }
+            East => {
+                let mut curr_pos = stone.clone();
+                let mut next_pos = curr_pos + dir.point_vec();
+                let mut next_pos_val = tilted_grid.get(&next_pos);
+                while next_pos.x <= limit && next_pos_val.unwrap_or(&'.') == &'.' {
+                    curr_pos = next_pos;
+                    next_pos = curr_pos + dir.point_vec();
+                    next_pos_val = tilted_grid.get(&next_pos);
+                }
+                tilted_grid.insert(curr_pos, 'O');
             }
         }
     }
@@ -52,20 +97,13 @@ fn tilt(grid: &HashMap<Point, char>, dir: Direction) -> HashMap<Point, char> {
     tilted_grid
 }
 
-fn compute_load(grid: &HashMap<Point, char>, dir: Direction) -> i64 {
-    match dir {
-        Direction::North => {
-            let max_y = grid.keys().map(|k| k.y).max().unwrap();
-            grid
-                .iter()
-                .filter(|(_, v)| v == &&'O')
-                .map(|(k, _)| ((max_y + 1) - k.y))
-                .sum()
-        }
-        Direction::East => { todo!() }
-        Direction::South => { todo!() }
-        Direction::West => { todo!() }
-    }
+fn compute_load(grid: &HashMap<Point, char>) -> i64 {
+    let max_y = grid.keys().map(|k| k.y).max().unwrap();
+    grid
+        .iter()
+        .filter(|(_, v)| v == &&'O')
+        .map(|(k, _)| ((max_y + 1) - k.y))
+        .sum()
 }
 
 enum Direction {
@@ -78,10 +116,10 @@ enum Direction {
 impl Direction {
     fn point_vec(&self) -> Point {
         match self {
-            Direction::North => Point { x: 0, y: -1 },
-            Direction::East => Point { x: 1, y: 0 },
-            Direction::South => Point { x: 0, y: 1 },
-            Direction::West => Point { x: -1, y: 0 },
+            North => Point { x: 0, y: -1 },
+            East => Point { x: 1, y: 0 },
+            South => Point { x: 0, y: 1 },
+            West => Point { x: -1, y: 0 },
         }
     }
 }
@@ -89,11 +127,11 @@ impl Direction {
 #[cfg(test)]
 mod tests {
     use crate::day14::Direction::North;
-    use crate::day14::{compute_load, tilt};
-    use crate::parse_lines_to_grid;
+    use crate::day14::{compute_load, cycle, tilt};
+    use crate::{dbg_print_grid, parse_lines_to_grid};
 
     #[test]
-    fn test() {
+    fn test_example_1() {
         let lines = vec![
             "O....#....".to_string(),
             "O.OO#....#".to_string(),
@@ -109,6 +147,107 @@ mod tests {
 
         let grid = parse_lines_to_grid(&lines);
         let tilted_grid = tilt(&grid, North);
-        assert_eq!(compute_load(&tilted_grid, North), 136);
+        assert_eq!(compute_load(&tilted_grid), 136);
+    }
+
+    #[test]
+    fn test_part2_1_cycle() {
+        let lines = vec![
+            "O....#....".to_string(),
+            "O.OO#....#".to_string(),
+            ".....##...".to_string(),
+            "OO.#O....O".to_string(),
+            ".O.....O#.".to_string(),
+            "O.#..O.#.#".to_string(),
+            "..O..#O..O".to_string(),
+            ".......O..".to_string(),
+            "#....###..".to_string(),
+            "#OO..#....".to_string(),
+        ];
+        let expected_lines = vec![
+            ".....#....".to_string(),
+            "....#...O#".to_string(),
+            "...OO##...".to_string(),
+            ".OO#......".to_string(),
+            ".....OOO#.".to_string(),
+            ".O#...O#.#".to_string(),
+            "....O#....".to_string(),
+            "......OOOO".to_string(),
+            "#...O###..".to_string(),
+            "#..OO#....".to_string(),
+        ];
+
+        let grid = parse_lines_to_grid(&lines);
+        let after_cycle = cycle(&grid);
+        dbg_print_grid(&after_cycle);
+        assert_eq!(compute_load(&after_cycle), compute_load(&parse_lines_to_grid(&expected_lines)));
+    }
+    #[test]
+    fn test_part2_2_cycle() {
+        let lines = vec![
+            "O....#....".to_string(),
+            "O.OO#....#".to_string(),
+            ".....##...".to_string(),
+            "OO.#O....O".to_string(),
+            ".O.....O#.".to_string(),
+            "O.#..O.#.#".to_string(),
+            "..O..#O..O".to_string(),
+            ".......O..".to_string(),
+            "#....###..".to_string(),
+            "#OO..#....".to_string(),
+        ];
+        let expected_lines = vec![
+            ".....#....".to_string(),
+            "....#...O#".to_string(),
+            ".....##...".to_string(),
+            "..O#......".to_string(),
+            ".....OOO#.".to_string(),
+            ".O#...O#.#".to_string(),
+            "....O#...O".to_string(),
+            ".......OOO".to_string(),
+            "#..OO###..".to_string(),
+            "#.OOO#...O".to_string(),
+        ];
+
+        let grid = parse_lines_to_grid(&lines);
+        let after_cycle = cycle(&grid);
+        let after_cycle = cycle(&after_cycle);
+        dbg_print_grid(&after_cycle);
+        assert_eq!(compute_load(&after_cycle), compute_load(&parse_lines_to_grid(&expected_lines)));
+    }
+
+    #[test]
+    fn test_part2_3_cycle() {
+        let lines = vec![
+            "O....#....".to_string(),
+            "O.OO#....#".to_string(),
+            ".....##...".to_string(),
+            "OO.#O....O".to_string(),
+            ".O.....O#.".to_string(),
+            "O.#..O.#.#".to_string(),
+            "..O..#O..O".to_string(),
+            ".......O..".to_string(),
+            "#....###..".to_string(),
+            "#OO..#....".to_string(),
+        ];
+        let expected_lines = vec![
+            ".....#....".to_string(),
+            "....#...O#".to_string(),
+            ".....##...".to_string(),
+            "..O#......".to_string(),
+            ".....OOO#.".to_string(),
+            ".O#...O#.#".to_string(),
+            "....O#...O".to_string(),
+            ".......OOO".to_string(),
+            "#...O###.O".to_string(),
+            "#.OOO#...O".to_string(),
+        ];
+
+        let grid = parse_lines_to_grid(&lines);
+        let after_cycle = cycle(&grid);
+        let after_cycle = cycle(&after_cycle);
+        let after_cycle = cycle(&after_cycle);
+        dbg_print_grid(&after_cycle);
+        assert_eq!(compute_load(&after_cycle), compute_load(&parse_lines_to_grid(&expected_lines)));
     }
 }
