@@ -24,7 +24,7 @@ fn main() {
 
     println!("Day 14");
     println!("{}", day14::part1());
-    // println!("{}", day13::part2());
+    println!("{}", day14::part2());
 }
 
 fn read_file_to_lines(path: &str) -> Vec<String> {
