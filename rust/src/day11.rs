@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use itertools::{enumerate, Itertools};
+use crate::Point;
 
 pub fn part1() -> i64 {
     let path = "inputs/day11.txt";
@@ -89,28 +90,13 @@ fn expand_universe_by_more_than_1(universe: &Vec<String>, expansion_amount: i64)
 
 fn expand_universe(universe: &Vec<String>) -> HashMap<Point, char> {
     let expanded_y = expand_vertically(universe);
-    let grid_with_expanded_y = parse_lines_to_grid(&expanded_y);
-    let rotated_grid = rotate_grid(&grid_with_expanded_y);
-    let rotated_lines = grid_to_lines(&rotated_grid);
+    let grid_with_expanded_y = crate::parse_lines_to_grid(&expanded_y);
+    let rotated_grid = crate::rotate_grid(&grid_with_expanded_y);
+    let rotated_lines = crate::grid_to_lines(&rotated_grid);
     let expanded_rotated_xy = expand_vertically(&rotated_lines);
 
     // Should be back in the original orientation and expanded
-    rotate_grid(&parse_lines_to_grid(&expanded_rotated_xy))
-}
-
-pub fn grid_to_lines(grid: &HashMap<Point, char>) -> Vec<String> {
-    let max_x = grid.iter().map(|(k, _)| k.x).max().unwrap();
-    let max_y = grid.iter().map(|(k, _)| k.y).max().unwrap();
-
-    let mut lines = Vec::new();
-    for y in 0..=max_y {
-        let mut line_y = String::new();
-        for x in 0..=max_x {
-            line_y.push(grid.get(&Point { x, y }).unwrap().clone())
-        }
-        lines.push(line_y);
-    }
-    lines
+    crate::rotate_grid(&crate::parse_lines_to_grid(&expanded_rotated_xy))
 }
 
 fn expand_vertically(universe: &Vec<String>) -> Vec<String> {
@@ -124,48 +110,10 @@ fn expand_vertically(universe: &Vec<String>) -> Vec<String> {
     expanded_y
 }
 
-pub fn rotate_grid(grid: &HashMap<Point, char>) -> HashMap<Point, char> {
-    grid.iter()
-        .map(|(p, c)| (Point { x: p.y, y: p.x }, c.clone()))
-        .collect()
-}
-
-pub fn parse_lines_to_grid(lines: &Vec<String>) -> HashMap<Point, char> {
-    let mut grid = HashMap::new();
-    let mut y = 0;
-    for line in lines {
-        let mut x = 0;
-        for char in line.chars() {
-            grid.insert(Point { x, y }, char.clone());
-            x += 1;
-        }
-        y += 1;
-    }
-
-    grid
-}
-
-fn dbg_print_grid(grid: &HashMap<Point, char>) {
-    let max_x = grid.iter().map(|(k, _)| k.x).max().unwrap();
-    let max_y = grid.iter().map(|(k, _)| k.y).max().unwrap();
-
-    for y in 0..=max_y {
-        for x in 0..=max_x {
-            print!("{}", grid.get(&Point { x, y }).unwrap());
-        }
-        println!()
-    }
-}
-
-#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
-pub struct Point {
-    x: i64,
-    y: i64,
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::day11::{dbg_print_grid, expand_universe, parse_lines_to_grid, solve_part1, solve_part2};
+    use crate::day11::{expand_universe, solve_part1, solve_part2};
+    use crate::{dbg_print_grid, parse_lines_to_grid};
 
     #[test]
     fn test_expand_universe() {

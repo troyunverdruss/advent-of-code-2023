@@ -1,7 +1,6 @@
 use std::cmp::min;
-use crate::day11::{grid_to_lines, parse_lines_to_grid, rotate_grid};
 use crate::day13::Dir::{HORIZONTAL, VERTICAL};
-use crate::read_file_to_lines;
+use crate::{grid_to_lines, parse_lines_to_grid, read_file_to_lines, rotate_grid};
 
 pub fn part1() -> i64 {
     let lines = read_file_to_lines("inputs/day13.txt");
