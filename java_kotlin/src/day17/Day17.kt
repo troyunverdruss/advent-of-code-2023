@@ -5,6 +5,8 @@ import day16.Direction
 import day16.Point
 import java.io.File
 import java.util.LinkedList
+import java.util.PriorityQueue
+import java.util.SortedSet
 import kotlin.math.min
 
 class Day17 {
@@ -35,18 +37,18 @@ class Day17 {
 
         // TODO (debug!!)
 //        val dest = Point(5,0)
-        val dest = Point(maxX,maxY)
+        val dest = Point(maxX, maxY)
 
         val visited = HashMap<VisitedKey, Int>()
-        val toVisit = LinkedList<State>()
-        val toVisitMap = HashMap<VisitedKey, Int>()
+        val toVisit = PriorityQueue<State>(compareBy { v -> v.heatLoss })
+        val toVisitSet = HashSet<State>()
         toVisit.add(state)
-        toVisitMap[state.toVisitedKey()] = state.heatLoss
+        toVisitSet.add(state)
         var lowestHeatLoss = Int.MAX_VALUE
 
         while (toVisit.isNotEmpty()) {
-            val currState = toVisit.pop()
-            toVisitMap.remove(currState.toVisitedKey())
+            val currState = toVisit.poll()
+            toVisitSet.remove(currState)
 
             val heatLoss = grid.get(currState.loc) ?: throw RuntimeException("outside of grid?")
             val totalHeatLoss = currState.heatLoss + heatLoss
@@ -68,11 +70,11 @@ class Day17 {
                 val visitedKey = ps.toVisitedKey()
                 if (
                     grid.containsKey(ps.loc)
-                    && (!visited.contains(visitedKey) || ps.heatLoss < visited[visitedKey]!!)
-                    && (!toVisitMap.contains(visitedKey) || ps.heatLoss <= toVisitMap[visitedKey]!!)
+                    && (!visited.contains(visitedKey))
+                    && !toVisitSet.contains(ps)
                 ) {
                     toVisit.add(ps)
-                    toVisitMap[visitedKey] = heatLoss
+                    toVisitSet.add(ps)
                 }
             }
         }
@@ -125,6 +127,7 @@ class Day17 {
             return VisitedKey(this.loc, this.fwdSteps, this.dir)
         }
     }
+
     data class VisitedKey(val loc: Point, val fwdSteps: Int, val dir: Direction)
 
     companion object {
