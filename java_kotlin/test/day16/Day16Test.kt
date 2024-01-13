@@ -20,7 +20,7 @@ class Day16Test {
                 """.trimIndent()
         val day16 = Day16()
         val lines = input.trim().split("\n")
-        val grid = day16.parseLinesToGrid(lines)
+        val grid = Day16.parseLinesToGrid(lines)
         assertEquals(day16.solvePart1(grid), 46)
     }
 
@@ -40,7 +40,7 @@ class Day16Test {
                 """.trimIndent()
         val day16 = Day16()
         val lines = input.trim().split("\n")
-        val grid = day16.parseLinesToGrid(lines)
+        val grid = Day16.parseLinesToGrid(lines)
         assertEquals(day16.solvePart2(grid), 51)
     }
 }

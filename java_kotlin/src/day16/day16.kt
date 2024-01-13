@@ -6,6 +6,24 @@ import kotlin.math.max
 
 class Day16 {
 
+    companion object {
+        fun parseLinesToGrid(lines: List<String>): Map<Point, String> {
+            val grid = HashMap<Point, String>()
+            var y = 0
+            lines.forEach { line ->
+                var x = 0
+                line.toCharArray().forEach { c ->
+//            line.chars().forEach { c: Char ->
+                    grid[Point(x, y)] = c.toString()
+                    x += 1
+                }
+                y += 1
+            }
+
+            return grid
+        }
+    }
+
     fun part1(): Long {
         val lines = File("inputs/day16.txt").readLines()
         val grid = parseLinesToGrid(lines)
@@ -63,22 +81,6 @@ class Day16 {
 
 
         return maxEnergized
-    }
-
-    fun parseLinesToGrid(lines: List<String>): Map<Point, String> {
-        val grid = HashMap<Point, String>()
-        var y = 0
-        lines.forEach { line ->
-            var x = 0
-            line.toCharArray().forEach { c ->
-//            line.chars().forEach { c: Char ->
-                grid[Point(x, y)] = c.toString()
-                x += 1
-            }
-            y += 1
-        }
-
-        return grid
     }
 
     fun traceLight(
