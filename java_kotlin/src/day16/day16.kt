@@ -1,27 +1,68 @@
 package day16
 
 import java.io.File
+import kotlin.math.max
 
 
 class Day16 {
 
-    fun part1() : Long {
+    fun part1(): Long {
         val lines = File("inputs/day16.txt").readLines()
         val grid = parseLinesToGrid(lines)
 
         return solvePart1(grid)
     }
 
+    fun part2(): Long {
+        val lines = File("inputs/day16.txt").readLines()
+        val grid = parseLinesToGrid(lines)
+
+        return solvePart2(grid)
+    }
+
     fun solvePart1(grid: Map<Point, String>): Long {
-        val energizerData  = HashMap<Point, EnergizerData>()
+        val energizerData = HashMap<Point, EnergizerData>()
         traceLight(
-            Point(0,0),
+            Point(0, 0),
             Direction.Right,
             grid,
             energizerData
         )
 
         return energizerData.size.toLong()
+    }
+
+    fun solvePart2(grid: Map<Point, String>): Long {
+        val maxX = grid.maxBy { e -> e.key.x }.key.x
+        val maxY = grid.maxBy { e -> e.key.y }.key.y
+        var maxEnergized = 0L
+
+        for (x in 0..maxX) {
+            val energizedData = HashMap<Point, EnergizerData>()
+            traceLight(Point(x, 0), Direction.Down, grid, energizedData)
+            maxEnergized = max(maxEnergized, energizedData.size.toLong())
+        }
+
+        for (x in 0..maxX) {
+            val energizedData = HashMap<Point, EnergizerData>()
+            traceLight(Point(x, maxY), Direction.Up, grid, energizedData)
+            maxEnergized = max(maxEnergized, energizedData.size.toLong())
+        }
+
+        for (y in 0..maxY) {
+            val energizedData = HashMap<Point, EnergizerData>()
+            traceLight(Point(0, y), Direction.Right, grid, energizedData)
+            maxEnergized = max(maxEnergized, energizedData.size.toLong())
+        }
+
+        for (y in 0..maxY) {
+            val energizedData = HashMap<Point, EnergizerData>()
+            traceLight(Point(maxX, y), Direction.Left, grid, energizedData)
+            maxEnergized = max(maxEnergized, energizedData.size.toLong())
+        }
+
+
+        return maxEnergized
     }
 
     fun parseLinesToGrid(lines: List<String>): Map<Point, String> {
@@ -88,7 +129,7 @@ class Day16 {
                     }
                 }
 
-                "|"               -> {
+                "|" -> {
                     when (nextDirection) {
                         Direction.Up, Direction.Down -> next += nextDirection.point
                         Direction.Right, Direction.Left -> {
@@ -97,6 +138,7 @@ class Day16 {
                         }
                     }
                 }
+
                 else -> throw RuntimeException("Unknown grid char")
             }
         }

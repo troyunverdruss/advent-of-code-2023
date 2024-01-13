@@ -36,4 +36,5 @@ fun main() {
     println("Day 16")
     val day16 = Day16()
     println(day16.part1())
+    println(day16.part2())
 }
