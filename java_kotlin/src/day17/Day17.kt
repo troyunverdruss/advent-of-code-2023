@@ -4,9 +4,7 @@ import day16.Day16
 import day16.Direction
 import day16.Point
 import java.io.File
-import java.util.LinkedList
-import java.util.PriorityQueue
-import java.util.SortedSet
+import java.util.*
 import kotlin.math.min
 
 class Day17 {
@@ -18,28 +16,59 @@ class Day17 {
         return solvePart1(grid)
     }
 
+    fun part2(): Long {
+        val lines = File("inputs/day17.txt").readLines()
+        val rawGrid = Day16.parseLinesToGrid(lines)
+        val grid = stringGridToDigits(rawGrid)
+        return solvePart2(grid)
+    }
+
     fun solvePart1(grid: Map<Point, Int>): Long {
         val path1 = findLowestHeatLossPath(
             grid,
-            State(Point(1, 0), 1, Direction.Right, 0)
+            State(Point(1, 0), 1, Direction.Right, 0),
+            3,
+            0
         )
         val path2 = findLowestHeatLossPath(
             grid,
-            State(Point(0, 1), 1, Direction.Down, 0)
+            State(Point(0, 1), 1, Direction.Down, 0),
+            3,
+            0
         )
 
         return min(path1, path2).toLong()
     }
 
-    fun findLowestHeatLossPath(grid: Map<Point, Int>, state: State): Int {
+    fun solvePart2(grid: Map<Point, Int>): Long {
+        val path1 = findLowestHeatLossPath(
+            grid,
+            State(Point(1, 0), 1, Direction.Right, 0),
+            10,
+            4
+        )
+        val path2 = findLowestHeatLossPath(
+            grid,
+            State(Point(0, 1), 1, Direction.Down, 0),
+            10,
+            4
+        )
+
+        return min(path1, path2).toLong()
+    }
+
+    private fun findLowestHeatLossPath(
+        grid: Map<Point, Int>,
+        state: State,
+        maxFwdSteps: Int,
+        minFwdSteps: Int
+    ): Int {
         val maxX = grid.maxBy { e -> e.key.x }.key.x
         val maxY = grid.maxBy { e -> e.key.y }.key.y
 
-        // TODO (debug!!)
-//        val dest = Point(5,0)
         val dest = Point(maxX, maxY)
 
-        val visited = HashMap<VisitedKey, Int>()
+        val visited = HashSet<VisitedKey>()
         val toVisit = PriorityQueue<State>(compareBy { v -> v.heatLoss })
         val toVisitSet = HashSet<State>()
         toVisit.add(state)
@@ -52,11 +81,7 @@ class Day17 {
 
             val heatLoss = grid.get(currState.loc) ?: throw RuntimeException("outside of grid?")
             val totalHeatLoss = currState.heatLoss + heatLoss
-            visited[VisitedKey(currState.loc, currState.fwdSteps, currState.dir)] = totalHeatLoss
-
-            if (totalHeatLoss >= lowestHeatLoss) {
-                continue
-            }
+            visited.add(VisitedKey(currState.loc, currState.fwdSteps, currState.dir))
 
             if (currState.loc == dest) {
                 lowestHeatLoss = min(lowestHeatLoss, totalHeatLoss)
@@ -64,7 +89,13 @@ class Day17 {
             }
 
             val fwdSteps = currState.fwdSteps + 1
-            val possibleNextStates = findNextSteps(fwdSteps, currState, totalHeatLoss)
+            val possibleNextStates = findNextSteps(
+                fwdSteps,
+                currState,
+                totalHeatLoss,
+                maxFwdSteps,
+                minFwdSteps
+            )
 
             possibleNextStates.forEach { ps ->
                 val visitedKey = ps.toVisitedKey()
@@ -85,10 +116,12 @@ class Day17 {
     private fun findNextSteps(
         fwdSteps: Int,
         currState: State,
-        totalHeatLoss: Int
+        totalHeatLoss: Int,
+        maxFwdSteps: Int,
+        minFwdSteps: Int
     ): MutableList<State> {
         val possibleNextStates = mutableListOf<State>()
-        if (fwdSteps <= 3) {
+        if (fwdSteps <= maxFwdSteps) {
             possibleNextStates.add(
                 State(
                     currState.loc + currState.dir.point,
@@ -98,16 +131,18 @@ class Day17 {
                 )
             )
         }
-        val turns = getTurns(currState.dir)
-        turns.forEach { turn ->
-            possibleNextStates.add(
-                State(
-                    currState.loc + turn.point,
-                    1,
-                    turn,
-                    totalHeatLoss
+        if (fwdSteps > minFwdSteps) {
+            val turns = getTurns(currState.dir)
+            turns.forEach { turn ->
+                possibleNextStates.add(
+                    State(
+                        currState.loc + turn.point,
+                        1,
+                        turn,
+                        totalHeatLoss
+                    )
                 )
-            )
+            }
         }
 
         return possibleNextStates

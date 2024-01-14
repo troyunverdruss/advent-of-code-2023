@@ -42,4 +42,5 @@ fun main() {
     println("Day 17")
     val day17 = Day17()
     println(day17.part1())
+    println(day17.part2()) // 828 too low
 }
