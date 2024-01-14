@@ -83,7 +83,7 @@ class Day17 {
             val totalHeatLoss = currState.heatLoss + heatLoss
             visited.add(VisitedKey(currState.loc, currState.fwdSteps, currState.dir))
 
-            if (currState.loc == dest) {
+            if (currState.loc == dest && currState.fwdSteps >= minFwdSteps) {
                 lowestHeatLoss = min(lowestHeatLoss, totalHeatLoss)
                 continue
             }
