@@ -33,11 +33,11 @@ fun main() {
 //    println(day16.part1())
 //    println(day16.part2())
 //
-    println("Day 17")
-    val day17 = Day17()
-    println(day17.part1())
-    println(day17.part2())
-
+//    println("Day 17")
+//    val day17 = Day17()
+//    println(day17.part1())
+//    println(day17.part2())
+//
     println("Day 18")
     val day18 = Day18()
     println(day18.part1())

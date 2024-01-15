@@ -23,6 +23,6 @@ class Day18Test {
             "U 2 (#7a21e3)",
         )
         val day = Day18()
-        assertEquals(day.solvePart1(lines), 38)
+        assertEquals(day.solvePart1(lines), 62)
     }
 }
