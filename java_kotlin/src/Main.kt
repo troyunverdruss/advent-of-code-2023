@@ -1,11 +1,5 @@
-import day06.Day06
-import day07.Day07
-import day07.Day07Part2
-import day08.Day08
-import day09.Day09
-import day10.Day10
-import day16.Day16
 import day17.Day17
+import day18.Day18
 
 fun main() {
 //    println("Day 6")
@@ -42,5 +36,10 @@ fun main() {
     println("Day 17")
     val day17 = Day17()
     println(day17.part1())
-    println(day17.part2()) // 828 too low
+    println(day17.part2())
+
+    println("Day 18")
+    val day18 = Day18()
+    println(day18.part1())
+//    println(day18.part2())
 }
