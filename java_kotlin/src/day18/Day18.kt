@@ -55,6 +55,8 @@ class Day18 {
         return grid.filterValues { v -> v == "#" }.count().toLong()
     }
 
+    // Using the "shoelace formula"
+    // https://en.wikipedia.org/wiki/Shoelace_formula
     fun calculatePolygonCoverage(instructions: List<Instruction>): Long {
         val vertices = findVertices(instructions)
         // abs(

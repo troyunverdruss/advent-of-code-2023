@@ -9,9 +9,9 @@ class Day16 {
     companion object {
         fun parseLinesToGrid(lines: List<String>): Map<Point, String> {
             val grid = HashMap<Point, String>()
-            var y = 0
+            var y = 0L
             lines.forEach { line ->
-                var x = 0
+                var x = 0L
                 line.toCharArray().forEach { c ->
 //            line.chars().forEach { c: Char ->
                     grid[Point(x, y)] = c.toString()
@@ -147,7 +147,7 @@ class Day16 {
     }
 }
 
-data class Point(val x: Int, val y: Int) {
+data class Point(val x: Long, val y: Long) {
     operator fun plus(point: Point): Point {
         return Point(this.x + point.x, this.y + point.y)
     }
