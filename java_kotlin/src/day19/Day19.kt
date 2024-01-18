@@ -8,6 +8,10 @@ class Day19 {
         val inputParts = rawString.split("\n\n")
         assert(inputParts.size == 2)
 
+        return solvePart1(inputParts)
+    }
+
+     fun solvePart1(inputParts: List<String>): Long {
         val workflows = inputParts.first().split("\n").map { parseWorkflowString(it) }
         val parts = inputParts.last().split("\n").filter { it.isNotEmpty() }.map { Part.parseString(it) }
 
