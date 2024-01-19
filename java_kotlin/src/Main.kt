@@ -1,4 +1,4 @@
-import day19.Day19
+import day20.Day20
 
 fun main() {
 //    println("Day 6")
@@ -41,9 +41,14 @@ fun main() {
 //    val day18 = Day18()
 //    println(day18.part1())
 //    println(day18.part2())
-
-    println("Day 19")
-    val day19 = Day19()
-    println(day19.part1())
-    println(day19.part2())
+//
+//    println("Day 19")
+//    val day19 = Day19()
+//    println(day19.part1())
+//    println(day19.part2())
+//
+    println("Day 20")
+    val day20 = Day20()
+    println(day20.part1())
+//    println(day19.part2())
 }
