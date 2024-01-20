@@ -2,6 +2,7 @@ package day20
 
 import org.testng.Assert.*
 import org.testng.annotations.Test
+import java.io.File
 
 class Day20Test {
     @Test
@@ -53,7 +54,7 @@ class Day20Test {
         val network = Network()
         val modules = Day20.parseModules(lines)
 
-        day.pressButtonModule(network, modules)
+        Day20.pressButtonModule(network, modules)
         assertEquals(network.getProductOfHighAndLowPulses(), 8 * 4)
     }
 

@@ -2,8 +2,8 @@ package day20
 
 class FlipFlopModule(
     override val name: ModuleName,
-    val destinations: List<ModuleName>,
-    private var state: OnOff = OnOff.OFF,
+    override val destinations: List<ModuleName>,
+    var state: OnOff = OnOff.OFF,
 ) : Module {
     override fun processPacket(packet: Packet): List<Packet> {
         val output = mutableListOf<Packet>()
@@ -32,4 +32,13 @@ class FlipFlopModule(
         }
         return output
     }
+
+    override fun toString(): String {
+        return when (state) {
+            OnOff.ON -> "#"
+            OnOff.OFF -> "_"
+
+        }
+    }
+
 }
