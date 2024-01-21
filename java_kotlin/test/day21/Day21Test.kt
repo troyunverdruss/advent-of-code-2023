@@ -42,4 +42,27 @@ class Day21Test {
         val day = Day21()
         assertEquals(day.solvePart1(lines, 6), 16)
     }
+
+    @Test
+    fun `verify example 2, 6 steps`() {
+        val day = Day21()
+        assertEquals(day.solvePart1(lines, 6), 16)
+    }
+
+    @Test
+    fun `verify example 2, 10 steps`() {
+        val day = Day21()
+        assertEquals(day.solvePart1(lines, 10), 50)
+    }
+
+    @Test
+    fun `verify example 2, 50 steps`() {
+        val day = Day21()
+        assertEquals(day.solvePart1(lines, 50), 1594)
+    }
+    @Test
+    fun `verify example 2, 100 steps`() {
+        val day = Day21()
+        assertEquals(day.solvePart1(lines, 100), 6536)
+    }
 }
