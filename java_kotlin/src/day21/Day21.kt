@@ -22,13 +22,39 @@ class Day21 {
     fun solvePart1Take2(lines: List<String>, targetSteps: Long): Long {
         initGlobals(lines)
         val start = grid.filter { it.value == "S" }.map { it.key }.first()
-        return grid
-            .filter { it.value != "#" }
-            .map { minStepsToPoint(start, it.key) }
-            .filter { it <= targetSteps }
-            .map { (targetSteps - it) % 2 }
-            .count { it == 0L }
-            .toLong()
+
+
+
+
+        // The following code will totally work ... eventually ... but it's so darn slow
+        // I only wanted to use it to double check that my theory about the grids worked
+        // correctly:
+//        var count = 0L
+//        (start.y - targetSteps..start.y + targetSteps).forEach { y ->
+//            (start.x - targetSteps..start.x + targetSteps).forEach { x ->
+//                val dest = Point(x, y)
+//                if (getFromRepeatingGrid(dest) != "#") {
+//                    val steps = minStepsToPoint(start, dest)
+//                    if (steps <= targetSteps && (targetSteps - steps) % 2 == 0L) {
+//                        count += 1
+//                    }
+//                }
+//            }
+//        }
+//        return count
+
+
+        // And this code will literally only work for the smallest examples, it's
+        // both too slow and doesn't really take into account the ever-expanding grid
+//        return grid
+//            .filter { it.value != "#" }
+//            .map { minStepsToPoint(start, it.key) }
+//            .filter { it <= targetSteps }
+//            .map { (targetSteps - it) % 2 }
+//            .count { it == 0L }
+//            .toLong()
+
+        return 0
     }
 
 
@@ -38,9 +64,13 @@ class Day21 {
         }
         val visited = HashSet<Node>()
         val toVisit = LinkedList<Node>()
+        val toVisitSet = HashSet<Node>()
         toVisit.add(Node(start))
+        toVisitSet.add(Node(start))
         while (toVisit.isNotEmpty()) {
             val currNode = toVisit.poll()!!
+            toVisitSet.remove(currNode)
+
             if (currNode.loc == dest) {
                 var steps = 0
                 var prevNode: Node? = currNode.prevNode
@@ -57,8 +87,9 @@ class Day21 {
                     if (it != "#") {
                         val toVisitNode = Node(nextPoint)
                         toVisitNode.prevNode = currNode
-                        if (!toVisit.contains(toVisitNode)) {
+                        if (!toVisitSet.contains(toVisitNode)) {
                             toVisit.add(toVisitNode)
+                            toVisitSet.add(toVisitNode)
                         }
                     }
                 }
@@ -126,6 +157,7 @@ class Day21 {
                 grid.maxBy { it.key.y }.key.y
             )
         }
+
         fun getFromRepeatingGrid(loc: Point): String {
             val nextPointLookup = Point(
                 boundLookup(max.x, loc.x),

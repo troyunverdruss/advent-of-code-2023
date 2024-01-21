@@ -22,6 +22,32 @@ class Day16 {
 
             return grid
         }
+
+        fun debugPrintGrid(grid: Map<Point, String>) {
+            val maxX = grid.keys.maxBy { it.x }.x
+            val maxY = grid.keys.maxBy { it.y }.y
+            (0..maxY).forEach { y ->
+                (0..maxX).forEach { x ->
+
+
+                    val v = grid[Point(x, y)]!!
+                    if (v == "#" || v.toInt() % 2 == 0) {
+                        print("$v".padStart(3, ' '))
+                    } else {
+                        print("$v".padStart(3, ' '))
+//                        print("x".padStart(3, ' '))
+                    }
+                    if (x  == 10L || x == 21L) {
+                        print("  |")
+                    }
+                }
+                println()
+                if (y  == 10L || y == 21L) {
+                    println("".padStart(maxX.toInt()*3, '-'))
+                }
+
+            }
+        }
     }
 
     fun part1(): Long {

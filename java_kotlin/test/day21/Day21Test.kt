@@ -101,4 +101,33 @@ class Day21Test {
         assertEquals(day.minStepsToPoint(start, Point(-1,4)), 7)
 
     }
+
+    @Test
+    fun `print out grid with shortest distance marked on all positions xx`() {
+        val day = Day21()
+        val extraLength = lines.map { it + it + it}
+        val extraLines = extraLength + extraLength + extraLength
+        Day21.initGlobals(extraLines)
+        val start = Day21.grid
+            .filter { it.value == "S" }
+            .map { it.key }
+            .sortedBy { it.x }
+            .subList(0,4)
+            .sortedBy { it.y }[0]
+
+
+
+        val myGrid = Day21.grid.toMutableMap()
+        Day21.grid.keys.forEach {
+            if (Day21.grid[it] != "#") {
+
+                val steps = day.minStepsToPoint(start, it)
+                myGrid[it] = "$steps"
+//            if (steps <= targetSteps && (targetSteps - steps) % 2 == 0L) {
+//
+//            }
+            }
+        }
+        Day16.debugPrintGrid(myGrid)
+    }
 }
