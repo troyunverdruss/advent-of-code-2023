@@ -21,6 +21,32 @@ class Day21Test {
         ".##..##.##.",
         "...........",
     )
+    val lines2 = listOf(
+        "...........",
+        ".....###.#.",
+        ".###.##..#.",
+        "..#.#...#..",
+        "....#.#....",
+        ".....S.....",
+        ".##..#...#.",
+        ".......##..",
+        ".##.#.####.",
+        ".##..##.##.",
+        "...........",
+    )
+    val lines3 = listOf(
+        "..................................................................",
+        ".....###.#......###.#......###.#......###.#......###.#......###.#.",
+        ".###.##..#..###.##..#..###.##..#..###.##..#..###.##..#..###.##..#.",
+        "..#.#...#....#.#...#....#.#...#....#.#...#....#.#...#....#.#...#..",
+        "....#.#........#.#........#.#........#.#........#.#........#.#....",
+        "...........x..........x..........x..........x..........x....S.....",
+        ".##..#...#..##..#...#..##..#...#..##..#...#..##..#...#..##..#...#.",
+        ".......##.........##.........##.........##.........##.........##..",
+        ".##.#.####..##.#.####..##.#.####..##.#.####..##.#.####..##.#.####.",
+        ".##..##.##..##..##.##..##..##.##..##..##.##..##..##.##..##..##.##.",
+        "..................................................................",
+    )
 
     @Test
     fun `verify example 1, 1 step`() {
@@ -53,7 +79,18 @@ class Day21Test {
     @Test
     fun `verify example 2, 6 steps`() {
         val day = Day21()
+        assertEquals(day.solvePart1(lines, 6), 16)
         assertEquals(day.solvePart1Take2(lines, 6), 16)
+
+        Day21.initGlobals(lines)
+        val count = day.countEndingPointsInArbitraryGrid(
+            listOf(Point(5, 5)),
+            listOf(0),
+            6,
+            Point(0, 0),
+            Day21.max
+        )
+        assertEquals(count, 16)
     }
 
     @Test
@@ -98,23 +135,22 @@ class Day21Test {
         val day = Day21()
         Day21.initGlobals(lines)
         val start = Day21.grid.filter { it.value == "S" }.map { it.key }.first()
-        assertEquals(day.minStepsToPoint(start, Point(-1,4)), 7)
+        assertEquals(day.minStepsToPoint(start, Point(-1, 4)), 7)
 
     }
 
     @Test
-    fun `print out grid with shortest distance marked on all positions xx`() {
+    fun `print out grid with shortest distance marked on all positions xxxx`() {
         val day = Day21()
-        val extraLength = lines.map { it + it + it}
-        val extraLines = extraLength + extraLength + extraLength
-        Day21.initGlobals(extraLines)
+        val extraLength = lines2.map { it + it + it + it + it + it }
+        val extraLines = extraLength
+        Day21.initGlobals(lines3)
         val start = Day21.grid
             .filter { it.value == "S" }
             .map { it.key }
-            .sortedBy { it.x }
-            .subList(0,4)
-            .sortedBy { it.y }[0]
-
+            .sortedBy { it.x }[0]
+//            .subList(9,12)
+//            .sortedBy { it.y }[0]
 
 
         val myGrid = Day21.grid.toMutableMap()
@@ -123,11 +159,27 @@ class Day21Test {
 
                 val steps = day.minStepsToPoint(start, it)
                 myGrid[it] = "$steps"
-//            if (steps <= targetSteps && (targetSteps - steps) % 2 == 0L) {
-//
-//            }
+                if (steps <= 55 && (55 - steps) % 2 == 0L) {
+                    myGrid[it] = "x"
+                }
             }
         }
         Day16.debugPrintGrid(myGrid)
+    }
+
+    @Test
+    fun `counting leftwards works correctly`() {
+        val day = Day21()
+
+        Day21.initGlobals(lines3)
+        val start = Day21.grid
+            .filter { it.value == "S" }
+            .map { it.key }
+            .sortedBy { it.x }[0]
+
+        Day21.searchInfiniteGrid = false
+        val bruteForceCount = day.find(55, start, 0).size.toLong()
+        Day21.searchInfiniteGrid = true
+        val smartCount = day.solvePart1Take2(lines2, 55)
     }
 }

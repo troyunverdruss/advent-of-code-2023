@@ -24,26 +24,29 @@ class Day16 {
         }
 
         fun debugPrintGrid(grid: Map<Point, String>) {
+            val minX = grid.keys.minBy { it.x }.x
             val maxX = grid.keys.maxBy { it.x }.x
+            val minY = grid.keys.minBy { it.y }.y
             val maxY = grid.keys.maxBy { it.y }.y
-            (0..maxY).forEach { y ->
-                (0..maxX).forEach { x ->
+            (minY..maxY).forEach { y ->
+                (minX..maxX).forEach { x ->
 
 
                     val v = grid[Point(x, y)]!!
-                    if (v == "#" || v.toInt() % 2 == 0) {
+                    if (v == "#") {
                         print("$v".padStart(3, ' '))
+//                    } else if ( v.toInt() % 2 == 0) {
+//                        print("x".padStart(3, ' '))
                     } else {
                         print("$v".padStart(3, ' '))
-//                        print("x".padStart(3, ' '))
                     }
-                    if (x  == 10L || x == 21L) {
+                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L) {
                         print("  |")
                     }
                 }
                 println()
-                if (y  == 10L || y == 21L) {
-                    println("".padStart(maxX.toInt()*3, '-'))
+                if (y == 10L || y == 21L) {
+                    println("".padStart(50, '-'))
                 }
 
             }
