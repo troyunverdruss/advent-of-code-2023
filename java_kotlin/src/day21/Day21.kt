@@ -30,13 +30,14 @@ class Day21 {
         val start = grid.filter { it.value == "S" }.map { it.key }.first()
 
         // First explore the original range of the given map
-        val ogGridWithDistances = grid.toMutableMap()
-        grid.keys.forEach {
-            if (grid[it] != "#") {
-                val steps = minStepsToPoint(start, it)
-                ogGridWithDistances[it] = "$steps"
-            }
-        }
+//        val ogGridWithDistances = grid.toMutableMap()
+//        grid.keys.forEach {
+//            if (grid[it] != "#") {
+//                val steps = minStepsToPoint(start, it)
+//                ogGridWithDistances[it] = "$steps"
+//            }
+//        }
+        val ogGridWithDistances = fillGridWithDistances(grid, start)
 
         // This is how many ending points are in the original grid
         // and since they alternate, we'll need this going forward
@@ -112,6 +113,46 @@ class Day21 {
                 ogGridValidEndingCount
 
         return resultSum
+    }
+
+    private fun fillGridWithDistances(grid: Map<Point, String>, start: Point): Map<Point, String> {
+        val visited = HashSet<Node>()
+        val toVisit = LinkedList<Node>()
+        val toVisitSet = HashSet<Node>()
+
+        toVisit.add(Node(start))
+        toVisitSet.add(Node(start))
+        while (toVisit.isNotEmpty()) {
+            val currNode = toVisit.poll()!!
+            toVisitSet.remove(currNode)
+            visited.add(currNode)
+
+            Direction.entries.forEach { dir ->
+                val nextPoint = currNode.loc + dir.point
+                grid[nextPoint]?.let {
+                    if (it != "#") {
+                        val toVisitNode = Node(nextPoint)
+                        toVisitNode.prevNode = currNode
+                        if (!toVisitSet.contains(toVisitNode) && !visited.contains(toVisitNode)) {
+                            toVisit.add(toVisitNode)
+                            toVisitSet.add(toVisitNode)
+                        }
+                    }
+                }
+            }
+        }
+        val filledGrid = grid.toMutableMap()
+        visited.forEach {
+            var steps = 0
+            var prevNode: Node? = it.prevNode
+            while (prevNode != null) {
+                steps += 1
+                prevNode = prevNode.prevNode
+            }
+            filledGrid[it.loc] = "$steps"
+        }
+
+        return filledGrid
     }
 
     private fun count(
@@ -290,20 +331,27 @@ class Day21 {
     fun countLargestDistanceInGridFromPoint(
         start: Point,
     ): Long {
-        if (largestDistanceInGridMemo.containsKey(start)) {
-            return largestDistanceInGridMemo[start]!!
-        }
-
-        val gridValues = mutableMapOf<Point, Long>()
-        grid.keys.forEach {
-            if (grid[it] != "#") {
-                val steps = minStepsToPoint(start, it)
-                gridValues[it] = steps
-            }
-        }
-        val result = gridValues.maxBy { it.value }.value
-        largestDistanceInGridMemo[start] = result
+        val gridValues = fillGridWithDistances(grid, start)
+        val result = gridValues
+            .filter { it.value != "#" }
+            .map { it.value.toLong() }
+            .maxBy { it }
         return result
+
+//        if (largestDistanceInGridMemo.containsKey(start)) {
+//            return largestDistanceInGridMemo[start]!!
+//        }
+//
+//        val gridValues = mutableMapOf<Point, Long>()
+//        grid.keys.forEach {
+//            if (grid[it] != "#") {
+//                val steps = minStepsToPoint(start, it)
+//                gridValues[it] = steps
+//            }
+//        }
+//        val result = gridValues.maxBy { it.value }.value
+//        largestDistanceInGridMemo[start] = result
+//        return result
     }
 
     fun countEndingPointsInArbitraryGrid(
@@ -382,7 +430,7 @@ class Day21 {
                     if (it != "#") {
                         val toVisitNode = Node(nextPoint)
                         toVisitNode.prevNode = currNode
-                        if (!toVisitSet.contains(toVisitNode)) {
+                        if (!toVisitSet.contains(toVisitNode) && !visited.contains(toVisitNode)) {
                             toVisit.add(toVisitNode)
                             toVisitSet.add(toVisitNode)
                         }
