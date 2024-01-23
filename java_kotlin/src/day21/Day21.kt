@@ -46,6 +46,9 @@ class Day21 {
         // This is the other value to alternate with
         val distanceToFarLeftCenterEdge = ogGridWithDistances[Point(0, start.y)]!!.toLong()
         val distanceToFarRightCenterEdge = ogGridWithDistances[Point(max.x, start.y)]!!.toLong()
+        val distanceToFarBottomCenterEdge = ogGridWithDistances[Point(start.x, max.y)]!!.toLong()
+        val distanceToFarTopCenterEdge = ogGridWithDistances[Point(start.x, 0)]!!.toLong()
+
         val neighborGridValidEndingCount = countEndingPointsInArbitraryGrid(
             listOf(Point(-1, start.y)),
             listOf(distanceToFarLeftCenterEdge + 1),
@@ -65,7 +68,6 @@ class Day21 {
             max.y
         )
 
-
         val rightwardTotalCount = countLeftwards(
             start,
             distanceToFarRightCenterEdge + 1,
@@ -77,8 +79,32 @@ class Day21 {
             max.y
         )
 
+        val downwardTotalCount = countLeftwards(
+            start,
+            distanceToFarBottomCenterEdge + 1,
+            targetSteps,
+            ogGridValidEndingCount,
+            neighborGridValidEndingCount,
+            Direction.Down,
+            0,
+            max.x
+        )
+
+        val upwardTotalCount = countLeftwards(
+            start,
+            distanceToFarTopCenterEdge + 1,
+            targetSteps,
+            ogGridValidEndingCount,
+            neighborGridValidEndingCount,
+            Direction.Up,
+            0,
+            max.x
+        )
+
 //        val resultSum = leftwardTotalCount + ogGridValidEndingCount
-        val resultSum = rightwardTotalCount + ogGridValidEndingCount
+//        val resultSum = rightwardTotalCount + ogGridValidEndingCount
+
+        val resultSum = upwardTotalCount + ogGridValidEndingCount
 
         return resultSum
 
@@ -236,14 +262,14 @@ class Day21 {
         val finalGridMin = when (dir) {
             Direction.Left -> Point(newStartPoint.x - (targetSteps - newStartDist), windowMin)
             Direction.Right -> Point(newStartPoint.x, windowMin)
-            Direction.Up -> TODO()
-            Direction.Down -> TODO()
+            Direction.Up -> Point(windowMin, newStartPoint.y - (targetSteps - newStartDist))
+            Direction.Down -> Point(windowMin, newStartPoint.y)
         }
         val finalGridMax = when (dir) {
             Direction.Left -> Point(newStartPoint.x, windowMax)
-            Direction.Right -> Point(newStartPoint.x + max.x, windowMax)
-            Direction.Up -> TODO()
-            Direction.Down -> TODO()
+            Direction.Right -> Point(newStartPoint.x + (targetSteps - newStartDist), windowMax)
+            Direction.Up -> Point(windowMax, newStartPoint.y)
+            Direction.Down -> Point(windowMax, newStartPoint.y + (targetSteps - newStartDist))
         }
 
         val remainderCount = countEndingPointsInArbitraryGrid(

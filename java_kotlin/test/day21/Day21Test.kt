@@ -23,15 +23,15 @@ class Day21Test {
     )
     val lines2 = listOf(
         "...........",
-        ".....###.#.",
-        ".###.##..#.",
+        "......##.#.",
+        ".###..#..#.",
         "..#.#...#..",
         "....#.#....",
         ".....S.....",
-        ".##..#...#.",
+        ".##......#.",
         ".......##..",
         ".##.#.####.",
-        ".##..##.##.",
+        ".##...#.##.",
         "...........",
     )
     val linesForGoingLeft = listOf(
@@ -59,6 +59,52 @@ val linesForGoingRight = listOf(
         ".##.#.####..##.#.####..##.#.####..##.#.####..##.#.####..##.#.####.",
         ".##..##.##..##..##.##..##..##.##..##..##.##..##..##.##..##..##.##.",
         "..................................................................",
+    )
+    val linesforGoingDown = listOf(
+        "...........",
+        "......##.#.",
+        ".###..#..#.",
+        "..#.#...#..",
+        "....#.#....",
+        ".....S.....",
+        ".##......#.",
+        ".......##..",
+        ".##.#.####.",
+        ".##...#.##.",
+        "...........",
+        "...........",
+        "......##.#.",
+        ".###..#..#.",
+        "..#.#...#..",
+        "....#.#....",
+        "...........",
+        ".##......#.",
+        ".......##..",
+        ".##.#.####.",
+        ".##...#.##.",
+        "...........",
+        "...........",
+        "......##.#.",
+        ".###..#..#.",
+        "..#.#...#..",
+        "....#.#....",
+        "...........",
+        ".##......#.",
+        ".......##..",
+        ".##.#.####.",
+        ".##...#.##.",
+        "...........",
+        "...........",
+        "......##.#.",
+        ".###..#..#.",
+        "..#.#...#..",
+        "....#.#....",
+        ".....s.....",
+        ".##......#.",
+        ".......##..",
+        ".##.#.####.",
+        ".##...#.##.",
+        "...........",
     )
 
     @Test
@@ -212,6 +258,72 @@ val linesForGoingRight = listOf(
         val bruteForceCount = day.find(55, start, 0).size.toLong()
         Day21.searchInfiniteGrid = true
         val smartCount = day.solvePart1Take2(lines2, 55)
+        assertEquals(smartCount, bruteForceCount)
+        println(smartCount)
+    }
+
+    @Test
+    fun `counting downwards works correctly`() {
+        val day = Day21()
+
+        Day21.initGlobals(linesforGoingDown)
+        val start = Day21.grid
+            .filter { it.value == "S" }
+            .map { it.key }
+            .sortedBy { it.x }[0]
+
+        Day21.searchInfiniteGrid = false
+        val bruteForceCount = day.find(33, start, 0).size.toLong()
+
+        val myGrid = Day21.grid.toMutableMap()
+        Day21.grid.keys.forEach {
+            if (Day21.grid[it] != "#") {
+                val steps = day.minStepsToPoint(start, it)
+                myGrid[it] = "$steps"
+                if (steps <= 33 && (33 - steps) % 2 == 0L) {
+//                    myGrid[it] = "x"
+                }
+            }
+        }
+        Day16.debugPrintGrid(myGrid)
+
+
+
+        Day21.searchInfiniteGrid = true
+        val smartCount = day.solvePart1Take2(lines2, 33)
+        assertEquals(smartCount, bruteForceCount)
+        println(smartCount)
+    }
+
+    @Test
+    fun `counting upwards works correctly`() {
+        val day = Day21()
+
+        Day21.initGlobals(linesforGoingDown)
+        val start = Day21.grid
+            .filter { it.value == "s" }
+            .map { it.key }
+            .sortedBy { it.x }[0]
+
+        Day21.searchInfiniteGrid = false
+        val bruteForceCount = day.find(33, start, 0).size.toLong()
+
+        val myGrid = Day21.grid.toMutableMap()
+        Day21.grid.keys.forEach {
+            if (Day21.grid[it] != "#") {
+                val steps = day.minStepsToPoint(start, it)
+                myGrid[it] = "$steps"
+                if (steps <= 33 && (33 - steps) % 2 == 0L) {
+//                    myGrid[it] = "x"
+                }
+            }
+        }
+        Day16.debugPrintGrid(myGrid)
+
+
+
+        Day21.searchInfiniteGrid = true
+        val smartCount = day.solvePart1Take2(lines2, 33)
         assertEquals(smartCount, bruteForceCount)
         println(smartCount)
     }
