@@ -40,13 +40,13 @@ class Day16 {
                     } else {
                         print("$v".padStart(3, ' '))
                     }
-                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L) {
+                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L || x == 65L || x == 76L) {
                         print("  |")
                     }
                 }
                 println()
-                if (y == 10L || y == 21L) {
-                    println("".padStart(50, '-'))
+                if (y == 10L || y == 21L || y == 32L || y == 43L || y == 54L || y == 65L || y == 76L) {
+                    println("".padStart(200, '-'))
                 }
 
             }
