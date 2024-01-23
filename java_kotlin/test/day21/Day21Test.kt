@@ -194,6 +194,25 @@ val linesForGoingRight = listOf(
         val bruteForceCount = day.find(55, start, 0).size.toLong()
         Day21.searchInfiniteGrid = true
         val smartCount = day.solvePart1Take2(lines2, 55)
-        assertEquals(bruteForceCount, smartCount)
+        assertEquals(smartCount, bruteForceCount)
+        println(smartCount)
+    }
+
+    @Test
+    fun `counting rightwards works correctly`() {
+        val day = Day21()
+
+        Day21.initGlobals(linesForGoingRight)
+        val start = Day21.grid
+            .filter { it.value == "S" }
+            .map { it.key }
+            .sortedBy { it.x }[0]
+
+        Day21.searchInfiniteGrid = false
+        val bruteForceCount = day.find(55, start, 0).size.toLong()
+        Day21.searchInfiniteGrid = true
+        val smartCount = day.solvePart1Take2(lines2, 55)
+        assertEquals(smartCount, bruteForceCount)
+        println(smartCount)
     }
 }

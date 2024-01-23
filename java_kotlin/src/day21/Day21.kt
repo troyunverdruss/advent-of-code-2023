@@ -45,6 +45,7 @@ class Day21 {
         // be the same for any neighboring grid
         // This is the other value to alternate with
         val distanceToFarLeftCenterEdge = ogGridWithDistances[Point(0, start.y)]!!.toLong()
+        val distanceToFarRightCenterEdge = ogGridWithDistances[Point(max.x, start.y)]!!.toLong()
         val neighborGridValidEndingCount = countEndingPointsInArbitraryGrid(
             listOf(Point(-1, start.y)),
             listOf(distanceToFarLeftCenterEdge + 1),
@@ -53,18 +54,33 @@ class Day21 {
             Point(-1, max.y)
         )
 
-        val leftwardTotalCount =
-            countLeftwards(
-                start,
-                distanceToFarLeftCenterEdge,
-                ogGridValidEndingCount,
-                neighborGridValidEndingCount,
-                targetSteps
-            )
+        val leftwardTotalCount = countLeftwards(
+            start,
+            distanceToFarLeftCenterEdge + 1,
+            targetSteps,
+            ogGridValidEndingCount,
+            neighborGridValidEndingCount,
+            Direction.Left,
+            0,
+            max.y
+        )
 
-        val leftSumPlusOriginal = leftwardTotalCount + ogGridValidEndingCount
 
-        return leftSumPlusOriginal
+        val rightwardTotalCount = countLeftwards(
+            start,
+            distanceToFarRightCenterEdge + 1,
+            targetSteps,
+            ogGridValidEndingCount,
+            neighborGridValidEndingCount,
+            Direction.Right,
+            0,
+            max.y
+        )
+
+//        val resultSum = leftwardTotalCount + ogGridValidEndingCount
+        val resultSum = rightwardTotalCount + ogGridValidEndingCount
+
+        return resultSum
 
 
 //        // Let's go left ...
@@ -178,36 +194,69 @@ class Day21 {
 
     private fun countLeftwards(
         start: Point,
-        distanceToFarLeftCenterEdge: Long,
-        ogGridValidEndingCount: Long,
-        neighborGridValidEndingCount: Long,
-        targetSteps: Long
+        stepsToStart: Long,
+        targetSteps: Long,
+        ogCountA: Long,
+        countB: Long,
+        dir: Direction,
+        windowMin: Long,
+        windowMax: Long
     ): Long {
-        val maxDistanceFromCenterRightEdge = countLargestDistanceInGridFromPoint(Point(max.x, start.y))
-        var leftCount = 0L
-        var steps = 0
-        var currMinSteps = distanceToFarLeftCenterEdge + 1
-        val gridEndingCounts = listOf(ogGridValidEndingCount, neighborGridValidEndingCount)
-
-        while (currMinSteps + maxDistanceFromCenterRightEdge < targetSteps) {
-            steps += 1
-            leftCount += gridEndingCounts[steps % 2]
-            currMinSteps += (max.x + 1)
+        val maxDistStart = when (dir) {
+            Direction.Left -> Point(max.x, start.y)
+            Direction.Right -> Point(0, start.y)
+            Direction.Up -> Point(start.x, max.y)
+            Direction.Down -> Point(start.x, 0)
         }
-        //        steps -= 1
-        val newStartPoint = Point(-((max.x + 1) * steps + 1), start.y)
+        val maxPossibleDist = countLargestDistanceInGridFromPoint(maxDistStart)
+
+        var steps = 0L
+        var gridSteps = 0
+
+        var currMinSteps = stepsToStart
+        val gridEndingCounts = listOf(ogCountA, countB)
+
+        while (currMinSteps + maxPossibleDist < targetSteps) {
+            gridSteps += 1
+            steps += gridEndingCounts[gridSteps % 2]
+            currMinSteps += when (dir) {
+                Direction.Left, Direction.Right -> (max.x + 1)
+                Direction.Up, Direction.Down -> (max.y + 1)
+            }
+        }
+
+        val newStartPoint = when (dir) {
+            Direction.Left -> Point(-((max.x + 1) * gridSteps + 1), start.y)
+            Direction.Right -> Point(((max.x + 1) * (gridSteps+1)), start.y)
+            Direction.Up -> Point(start.x, -((max.y + 1) * gridSteps + 1))
+            Direction.Down -> Point(start.x, ((max.y + 1) * (gridSteps+1)))
+        }
         val newStartDist = distance(start, newStartPoint)
-        val leftwardRemainderCount = countEndingPointsInArbitraryGrid(
+
+        val finalGridMin = when (dir) {
+            Direction.Left -> Point(newStartPoint.x - (targetSteps - newStartDist), windowMin)
+            Direction.Right -> Point(newStartPoint.x, windowMin)
+            Direction.Up -> TODO()
+            Direction.Down -> TODO()
+        }
+        val finalGridMax = when (dir) {
+            Direction.Left -> Point(newStartPoint.x, windowMax)
+            Direction.Right -> Point(newStartPoint.x + max.x, windowMax)
+            Direction.Up -> TODO()
+            Direction.Down -> TODO()
+        }
+
+        val remainderCount = countEndingPointsInArbitraryGrid(
             listOf(newStartPoint),
             listOf(newStartDist),
             targetSteps,
-            Point(newStartPoint.x - (targetSteps - newStartDist), 0),
-            //            Point(-(targetSteps - newStartDist) + 5 , 0),
-            Point(newStartPoint.x, max.y)
+            finalGridMin,
+            finalGridMax
         )
 
-        val leftwardTotalCount = leftCount + leftwardRemainderCount
-        return leftwardTotalCount
+        val totalCount = steps + remainderCount
+
+        return totalCount
     }
 
     fun distance(p1: Point, p2: Point): Long {
@@ -385,16 +434,21 @@ class Day21 {
 
         fun getFromRepeatingGrid(loc: Point): String? {
             return if (searchInfiniteGrid) {
-                val nextPointLookup = Point(
-                    boundLookup(max.x, loc.x),
-                    boundLookup(max.y, loc.y)
-                )
+                val nextPointLookup = boundLookup(loc)
 
                 return grid[nextPointLookup]!!
             } else {
                 return grid[loc]
             }
         }
+
+        private fun boundLookup(loc: Point): Point {
+            return Point(
+                boundLookup(max.x, loc.x),
+                boundLookup(max.y, loc.y)
+            )
+        }
+
 
         private fun boundLookup(maxValue: Long, value: Long): Long {
             return if (value < 0) {
