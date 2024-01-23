@@ -20,7 +20,7 @@ class Day21 {
         return find(targetSteps, start, 0).size.toLong()
     }
 
-    fun solvePart1Take2(lines: List<String>, targetSteps: Long): Long {
+    fun solvePart2(lines: List<String>, targetSteps: Long): Long {
         initGlobals(lines)
         val start = grid.filter { it.value == "S" }.map { it.key }.first()
 
@@ -57,8 +57,8 @@ class Day21 {
             Point(-1, max.y)
         )
 
-        val leftwardTotalCount = countLeftwards(
-            start,
+        val leftOnlyTotalCount = count(
+            Point(start.x - distanceToFarLeftCenterEdge - 1, start.y),
             distanceToFarLeftCenterEdge + 1,
             targetSteps,
             ogGridValidEndingCount,
@@ -68,8 +68,8 @@ class Day21 {
             max.y
         )
 
-        val rightwardTotalCount = countLeftwards(
-            start,
+        val rightOnlyTotalCount = count(
+            Point(start.x + distanceToFarRightCenterEdge + 1, start.y),
             distanceToFarRightCenterEdge + 1,
             targetSteps,
             ogGridValidEndingCount,
@@ -79,8 +79,8 @@ class Day21 {
             max.y
         )
 
-        val downwardTotalCount = countLeftwards(
-            start,
+        val downWithSideBranchesCount = count(
+            Point(start.x, start.y + distanceToFarBottomCenterEdge + 1),
             distanceToFarBottomCenterEdge + 1,
             targetSteps,
             ogGridValidEndingCount,
@@ -90,8 +90,8 @@ class Day21 {
             max.x
         )
 
-        val upwardTotalCount = countLeftwards(
-            start,
+        val upWithSideBranchesCount = count(
+            Point(start.x, start.y - distanceToFarTopCenterEdge - 1),
             distanceToFarTopCenterEdge + 1,
             targetSteps,
             ogGridValidEndingCount,
@@ -100,125 +100,16 @@ class Day21 {
             0,
             max.x
         )
-
-//        val resultSum = leftwardTotalCount + ogGridValidEndingCount
-//        val resultSum = rightwardTotalCount + ogGridValidEndingCount
-
-        val resultSum = upwardTotalCount + ogGridValidEndingCount
+        val resultSum = leftOnlyTotalCount +
+                rightOnlyTotalCount +
+                upWithSideBranchesCount +
+                downWithSideBranchesCount +
+                ogGridValidEndingCount
 
         return resultSum
-
-
-//        // Let's go left ...
-//        // All leftmost edges from the original grid:
-//        val originalLeft = exploredGridWithDistances.filter { it.key.x == 0L }
-//        val leftPlusOne = originalLeft.keys
-//            .map { Point(it.x - (max.x + 1), it.y) }
-//            .map {
-//                Pair(
-//                    it,
-//                    minStepsToPoint(start, it).toString()
-//                )
-//            }
-//        val leftPlusTwo = originalLeft.keys
-//            .map { Point(it.x - 2 * (max.x + 1), it.y) }
-//            .map {
-//                Pair(
-//                    it,
-//                    minStepsToPoint(start, it).toString()
-//                )
-//            }
-//
-//        val leftPlusThree = originalLeft.keys
-//            .map { Point(it.x - 3 * (max.x + 1), it.y) }
-//            .map {
-//                Pair(
-//                    it,
-//                    minStepsToPoint(start, it).toString()
-//                )
-//            }
-//        val leftPlusFour = originalLeft.keys
-//            .map { Point(it.x - 4 * (max.x + 1), it.y) }
-//            .map {
-//                Pair(
-//                    it,
-//                    minStepsToPoint(start, it).toString()
-//                )
-//            }
-//        debugPrintGrid(originalLeft)
-//        debugPrintGrid(leftPlusOne.toMap())
-//        debugPrintGrid(leftPlusTwo.toMap())
-//        debugPrintGrid(leftPlusThree.toMap())
-//        debugPrintGrid(leftPlusFour.toMap())
-//
-//        // Compute the deltas, top to bottom
-//        val n0 = originalLeft.entries.sortedBy { it.key.y }.map { Pair(it.key, it.value) }
-//        val n1 = leftPlusOne.sortedBy { it.first.y }
-//        val n2 = leftPlusTwo.sortedBy { it.first.y }
-//        val n3 = leftPlusThree.sortedBy { it.first.y }
-//        val n4 = leftPlusFour.sortedBy { it.first.y }
-//
-//        val delta1 = n1.mapIndexed { index, pair ->
-//            Pair(pair.first.y, n1[index].second.toLong() - n0[index].second.toLong())
-//        }
-//        val delta2 = n2.mapIndexed { index, pair ->
-//            Pair(pair.first.y, n2[index].second.toLong() - n1[index].second.toLong())
-//        }
-//        val delta3 = n3.mapIndexed { index, pair ->
-//            Pair(pair.first.y, n3[index].second.toLong() - n2[index].second.toLong())
-//        }
-//        val delta4 = n4.mapIndexed { index, pair ->
-//            Pair(pair.first.y, n4[index].second.toLong() - n3[index].second.toLong())
-//        }
-//
-//
-//        val lowestLeft = exploredGridWithDistances
-//            .filter { it.key.x == 0L }
-//            .minBy { it.value.toLong() }
-//        val countLeftRepeat = countEndingPointsInArbitraryGrid(
-//            listOf(lowestLeft.key + Direction.Left.point),
-//            listOf(lowestLeft.value.toLong() + 1),
-//            targetSteps,
-//            Point(-max.x - 1, 0),
-//            Point(-1, max.y)
-//        )
-//
-//        val i = 0
-////        val countValidEndingLocations
-//
-//
-//        // The following code will totally work ... eventually ... but it's so darn slow
-//        // I only wanted to use it to double check that my theory about the grids worked
-//        // correctly:
-////        var count = 0L
-////        (start.y - targetSteps..start.y + targetSteps).forEach { y ->
-////            (start.x - targetSteps..start.x + targetSteps).forEach { x ->
-////                val dest = Point(x, y)
-////                if (getFromRepeatingGrid(dest) != "#") {
-////                    val steps = minStepsToPoint(start, dest)
-////                    if (steps <= targetSteps && (targetSteps - steps) % 2 == 0L) {
-////                        count += 1
-////                    }
-////                }
-////            }
-////        }
-////        return count
-//
-//
-//        // And this code will literally only work for the smallest examples, it's
-//        // both too slow and doesn't really take into account the ever-expanding grid
-////        return grid
-////            .filter { it.value != "#" }
-////            .map { minStepsToPoint(start, it.key) }
-////            .filter { it <= targetSteps }
-////            .map { (targetSteps - it) % 2 }
-////            .count { it == 0L }
-////            .toLong()
-
-        return 0
     }
 
-    private fun countLeftwards(
+    private fun count(
         start: Point,
         stepsToStart: Long,
         targetSteps: Long,
@@ -234,7 +125,7 @@ class Day21 {
             Direction.Up -> Point(start.x, max.y)
             Direction.Down -> Point(start.x, 0)
         }
-        val maxPossibleDist = countLargestDistanceInGridFromPoint(maxDistStart)
+        val maxPossibleDist = countLargestDistanceInGridFromPoint(boundLookup(maxDistStart))
 
         var steps = 0L
         var gridSteps = 0
@@ -243,21 +134,40 @@ class Day21 {
         val gridEndingCounts = listOf(ogCountA, countB)
 
         while (currMinSteps + maxPossibleDist < targetSteps) {
+
             gridSteps += 1
-            steps += gridEndingCounts[gridSteps % 2]
+            val newSteps = gridEndingCounts[gridSteps % 2]
             currMinSteps += when (dir) {
                 Direction.Left, Direction.Right -> (max.x + 1)
                 Direction.Up, Direction.Down -> (max.y + 1)
             }
+
+            // Each step of the way we need to branch off and count
+            if (dir == Direction.Up || dir == Direction.Down) {
+
+                val branchStart = when (dir) {
+                    Direction.Up -> Point(start.x, start.y - ((max.y + 1) * (gridSteps - 1)))
+                    Direction.Down -> Point(start.x, start.y + ((max.y + 1) * (gridSteps - 1)))
+                    else -> throw NotImplementedError()
+                }
+                val branchSteps = addBranches(
+                    dir,
+                    gridSteps,
+                    branchStart,
+                    windowMin,
+                    targetSteps,
+                    gridEndingCounts,
+                    windowMax,
+                    stepsToStart + distance(start, branchStart)
+                )
+                steps += branchSteps
+            }
+
+            steps += newSteps
         }
 
-        val newStartPoint = when (dir) {
-            Direction.Left -> Point(-((max.x + 1) * gridSteps + 1), start.y)
-            Direction.Right -> Point(((max.x + 1) * (gridSteps+1)), start.y)
-            Direction.Up -> Point(start.x, -((max.y + 1) * gridSteps + 1))
-            Direction.Down -> Point(start.x, ((max.y + 1) * (gridSteps+1)))
-        }
-        val newStartDist = distance(start, newStartPoint)
+        val newStartPoint = computeNewStartPoint(dir, gridSteps, start)
+        val newStartDist = distance(start, newStartPoint) + stepsToStart
 
         val finalGridMin = when (dir) {
             Direction.Left -> Point(newStartPoint.x - (targetSteps - newStartDist), windowMin)
@@ -280,9 +190,92 @@ class Day21 {
             finalGridMax
         )
 
+        // Even at the far end of our reach we need to still branch sideways since
+        // there might be a few stragglers
+        if (dir == Direction.Up || dir == Direction.Down) {
+            val branchStart = when (dir) {
+                Direction.Up -> Point(start.x, start.y - ((max.y + 1) * (gridSteps)))
+                Direction.Down -> Point(start.x, start.y + ((max.y + 1) * (gridSteps)))
+                else -> throw NotImplementedError()
+            }
+            val remainderBranchesCount = addBranches(
+                dir,
+                gridSteps+1,
+                branchStart,
+                windowMin,
+                targetSteps,
+                gridEndingCounts,
+                windowMax,
+                stepsToStart + distance(start, branchStart)
+            )
+            steps += remainderBranchesCount
+        }
+
         val totalCount = steps + remainderCount
 
         return totalCount
+    }
+
+    private fun addBranches(
+        dir: Direction,
+        gridSteps: Int,
+        start: Point,
+        windowMin: Long,
+        targetSteps: Long,
+        gridEndingCounts: List<Long>,
+        windowMax: Long,
+        stepsToStart: Long
+    ): Long {
+        var leftSteps = 0L
+        var rightSteps = 0L
+        if (dir == Direction.Up || dir == Direction.Down) {
+            val newMin = when (dir) {
+                Direction.Up -> start.y - max.y
+                Direction.Down -> start.y
+                else -> throw NotImplementedError()
+            }
+            val newMax = when (dir) {
+                Direction.Up -> start.y
+                Direction.Down -> start.y + max.y
+                else -> throw NotImplementedError()
+            }
+
+            val newCenterStartPoint = computeNewStartPoint(dir, gridSteps - 1, start)
+
+            val newLeftStart = Point(windowMin - 1, newCenterStartPoint.y)
+            val distToLeftStart = distance(start, newLeftStart) + stepsToStart
+            leftSteps = count(
+                newLeftStart,
+                distToLeftStart,
+                targetSteps,
+                gridEndingCounts[gridSteps % 2],
+                gridEndingCounts[(gridSteps + 1) % 2],
+                Direction.Left,
+                newMin,
+                newMax
+
+            )
+            val newRightStart = Point(windowMax + 1, newCenterStartPoint.y)
+            val distToRightStart = distance(start, newRightStart) + stepsToStart
+            rightSteps = count(
+                newRightStart,
+                distToRightStart,
+                targetSteps,
+                gridEndingCounts[gridSteps % 2],
+                gridEndingCounts[(gridSteps + 1) % 2],
+                Direction.Right,
+                newMin,
+                newMax
+            )
+        }
+        return leftSteps + rightSteps
+    }
+
+    private fun computeNewStartPoint(dir: Direction, gridSteps: Int, start: Point) = when (dir) {
+        Direction.Left -> Point(-((max.x + 1) * gridSteps + 1), start.y)
+        Direction.Right -> Point(((max.x + 1) * (gridSteps + 1)), start.y)
+        Direction.Up -> Point(start.x, -((max.y + 1) * gridSteps + 1))
+        Direction.Down -> Point(start.x, ((max.y + 1) * (gridSteps + 1)))
     }
 
     fun distance(p1: Point, p2: Point): Long {
@@ -292,6 +285,10 @@ class Day21 {
     fun countLargestDistanceInGridFromPoint(
         start: Point,
     ): Long {
+        if (largestDistanceInGridMemo.containsKey(start)) {
+            return largestDistanceInGridMemo[start]!!
+        }
+
         val gridValues = mutableMapOf<Point, Long>()
         grid.keys.forEach {
             if (grid[it] != "#") {
@@ -299,7 +296,9 @@ class Day21 {
                 gridValues[it] = steps
             }
         }
-        return gridValues.maxBy { it.value }.value
+        val result = gridValues.maxBy { it.value }.value
+        largestDistanceInGridMemo[start] = result
+        return result
     }
 
     fun countEndingPointsInArbitraryGrid(
@@ -446,6 +445,7 @@ class Day21 {
         var max: Point = Point(0, 0)
         val memoMap: MutableMap<MemoKey, Map<Point, Long>> = mutableMapOf()
         var searchInfiniteGrid = true
+        val largestDistanceInGridMemo = mutableMapOf<Point, Long>()
 
         data class MemoKey(val targetSteps: Long, val loc: Point, val steps: Long)
 

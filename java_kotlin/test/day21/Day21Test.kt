@@ -191,35 +191,35 @@ class Day21Test {
     fun `verify example 1, 1 step`() {
         val day = Day21()
         assertEquals(day.solvePart1(lines, 1), 2)
-        assertEquals(day.solvePart1Take2(lines, 1), 2)
+        assertEquals(day.solvePart2(lines, 1), 2)
     }
 
     @Test
     fun `verify example 1, 2 steps`() {
         val day = Day21()
         assertEquals(day.solvePart1(lines, 2), 4)
-        assertEquals(day.solvePart1Take2(lines, 2), 4)
+        assertEquals(day.solvePart2(lines, 2), 4)
     }
 
     @Test
     fun `verify example 1, 3 steps`() {
         val day = Day21()
         assertEquals(day.solvePart1(lines, 3), 6)
-        assertEquals(day.solvePart1Take2(lines, 3), 6)
+        assertEquals(day.solvePart2(lines, 3), 6)
     }
 
     @Test
     fun `verify example 1, 6 steps`() {
         val day = Day21()
         assertEquals(day.solvePart1(lines, 6), 16)
-        assertEquals(day.solvePart1Take2(lines, 6), 16)
+        assertEquals(day.solvePart2(lines, 6), 16)
     }
 
     @Test
     fun `verify example 2, 6 steps`() {
         val day = Day21()
         assertEquals(day.solvePart1(lines, 6), 16)
-        assertEquals(day.solvePart1Take2(lines, 6), 16)
+        assertEquals(day.solvePart2(lines, 6), 16)
 
         Day21.initGlobals(lines)
         val count = day.countEndingPointsInArbitraryGrid(
@@ -235,19 +235,19 @@ class Day21Test {
     @Test
     fun `verify example 2, 10 steps`() {
         val day = Day21()
-        assertEquals(day.solvePart1Take2(lines, 10), 50)
+        assertEquals(day.solvePart2(lines, 10), 50)
     }
 
     @Test
     fun `verify example 2, 50 steps`() {
         val day = Day21()
-        assertEquals(day.solvePart1Take2(lines, 50), 1594)
+        assertEquals(day.solvePart2(lines, 50), 1594)
     }
 
     @Test
     fun `verify example 2, 100 steps`() {
         val day = Day21()
-        assertEquals(day.solvePart1Take2(lines, 100), 6536)
+        assertEquals(day.solvePart2(lines, 100), 6536)
     }
 
     @Test
@@ -319,7 +319,7 @@ class Day21Test {
         Day21.searchInfiniteGrid = false
         val bruteForceCount = day.find(55, start, 0).size.toLong()
         Day21.searchInfiniteGrid = true
-        val smartCount = day.solvePart1Take2(lines2, 55)
+        val smartCount = day.solvePart2(lines2, 55)
         assertEquals(smartCount, bruteForceCount)
         println(smartCount)
     }
@@ -337,7 +337,7 @@ class Day21Test {
         Day21.searchInfiniteGrid = false
         val bruteForceCount = day.find(55, start, 0).size.toLong()
         Day21.searchInfiniteGrid = true
-        val smartCount = day.solvePart1Take2(lines2, 55)
+        val smartCount = day.solvePart2(lines2, 55)
         assertEquals(smartCount, bruteForceCount)
         println(smartCount)
     }
@@ -370,7 +370,7 @@ class Day21Test {
 
 
         Day21.searchInfiniteGrid = true
-        val smartCount = day.solvePart1Take2(lines2, 33)
+        val smartCount = day.solvePart2(lines2, 33)
         assertEquals(smartCount, bruteForceCount)
         println(smartCount)
     }
@@ -403,7 +403,7 @@ class Day21Test {
 
 
         Day21.searchInfiniteGrid = true
-        val smartCount = day.solvePart1Take2(lines2, 33)
+        val smartCount = day.solvePart2(lines2, 33)
         assertEquals(smartCount, bruteForceCount)
         println(smartCount)
     }
@@ -437,7 +437,7 @@ class Day21Test {
 //        Day16.debugPrintGrid(myGrid)
 
         Day21.searchInfiniteGrid = true
-        val smartCount = day.solvePart1Take2(lines2, 35)
+        val smartCount = day.solvePart2(lines2, 35)
         assertEquals(smartCount, bruteForceCount)
         println(smartCount)
     }
