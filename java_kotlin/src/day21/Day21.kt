@@ -14,6 +14,11 @@ class Day21 {
         return solvePart1(lines, 64)
     }
 
+    fun part2(): Long {
+        val lines = File("inputs/day21.txt").readLines()
+        return solvePart2(lines, 26501365)
+    }
+
     fun solvePart1(lines: List<String>, targetSteps: Long): Long {
         initGlobals(lines)
         val start = grid.filter { it.value == "S" }.map { it.key }.first()
@@ -50,8 +55,8 @@ class Day21 {
         val distanceToFarTopCenterEdge = ogGridWithDistances[Point(start.x, 0)]!!.toLong()
 
         val neighborGridValidEndingCount = countEndingPointsInArbitraryGrid(
-            listOf(Point(-1, start.y)),
-            listOf(distanceToFarLeftCenterEdge + 1),
+            Point(-1, start.y),
+            distanceToFarLeftCenterEdge + 1,
             targetSteps,
             Point(-(max.x + 1), 0),
             Point(-1, max.y)
@@ -183,8 +188,8 @@ class Day21 {
         }
 
         val remainderCount = countEndingPointsInArbitraryGrid(
-            listOf(newStartPoint),
-            listOf(newStartDist),
+            newStartPoint,
+            newStartDist,
             targetSteps,
             finalGridMin,
             finalGridMax
@@ -200,7 +205,7 @@ class Day21 {
             }
             val remainderBranchesCount = addBranches(
                 dir,
-                gridSteps+1,
+                gridSteps + 1,
                 branchStart,
                 windowMin,
                 targetSteps,
@@ -302,13 +307,12 @@ class Day21 {
     }
 
     fun countEndingPointsInArbitraryGrid(
-        starts: List<Point>,
-        startingStepCounts: List<Long>,
+        start: Point,
+        startingStepCount: Long,
         targetSteps: Long,
         min: Point,
         max: Point
     ): Long {
-        assert(starts.size == startingStepCounts.size)
         val gridToExplore = mutableMapOf<Point, String>()
         val gridValues = mutableMapOf<Point, Long>()
 
@@ -319,15 +323,13 @@ class Day21 {
             }
         }
 
-        starts.forEachIndexed { index, start ->
-            gridToExplore.keys.forEach {
-                if (gridToExplore[it] != "#") {
-                    val steps = minStepsToPoint(start, it)
-                    val currVal = gridValues[it] ?: Long.MAX_VALUE
-                    gridValues[it] = min(steps + startingStepCounts[index], currVal)
-                } else {
+        gridToExplore.keys.forEach {
+            if (gridToExplore[it] != "#") {
+                val steps = minStepsToPoint(start, it)
+                val currVal = gridValues[it] ?: Long.MAX_VALUE
+                gridValues[it] = min(steps + startingStepCount, currVal)
+            } else {
 //                    gridValues[it] = -1L
-                }
             }
         }
 

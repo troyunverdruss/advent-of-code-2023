@@ -223,8 +223,8 @@ class Day21Test {
 
         Day21.initGlobals(lines)
         val count = day.countEndingPointsInArbitraryGrid(
-            listOf(Point(5, 5)),
-            listOf(0),
+            Point(5, 5),
+            0,
             6,
             Point(0, 0),
             Day21.max

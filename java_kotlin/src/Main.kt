@@ -56,7 +56,7 @@ fun main() {
     println("Day 21")
     val day21 = Day21()
     println(day21.part1())
-//    println(day21.part2())
+    println(day21.part2())
 
 
 }
