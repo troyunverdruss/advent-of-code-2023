@@ -1,6 +1,5 @@
 package day21
 
-import day16.Day16.Companion.debugPrintGrid
 import day16.Day16.Companion.parseLinesToGrid
 import day16.Direction
 import day16.Point
@@ -26,57 +25,45 @@ class Day21 {
         val start = grid.filter { it.value == "S" }.map { it.key }.first()
 
         // First explore the original range of the given map
-        val exploredGridWithDistances = grid.toMutableMap()
+        val ogGridWithDistances = grid.toMutableMap()
         grid.keys.forEach {
             if (grid[it] != "#") {
                 val steps = minStepsToPoint(start, it)
-                exploredGridWithDistances[it] = "$steps"
+                ogGridWithDistances[it] = "$steps"
             }
         }
 
-        // If the search space is small enough, just run the old original method
-        // for now
-//        if (targetSteps < 2 * max.x) {
-//            return solvePart1(lines, targetSteps)
-//        }
-
-
-        val countValidEndingLocationsOriginalGrid = exploredGridWithDistances
+        // This is how many ending points are in the original grid
+        // and since they alternate, we'll need this going forward
+        val ogGridValidEndingCount = ogGridWithDistances
             .filter { it.value != "#" }
             .map { (targetSteps - it.value.toLong()) % 2 }
             .count { it == 0L }
             .toLong()
-        val distanceToFarLeftCenterEdge = exploredGridWithDistances[Point(0, start.y)]!!.toLong()
-        val countValidEndingLocationsInLeftGrid = countEndingPointsInArbitraryGrid(
+
+        // This happens to be the grid adjacent leftwards but should theoretically
+        // be the same for any neighboring grid
+        // This is the other value to alternate with
+        val distanceToFarLeftCenterEdge = ogGridWithDistances[Point(0, start.y)]!!.toLong()
+        val neighborGridValidEndingCount = countEndingPointsInArbitraryGrid(
             listOf(Point(-1, start.y)),
             listOf(distanceToFarLeftCenterEdge + 1),
             targetSteps,
             Point(-(max.x + 1), 0),
             Point(-1, max.y)
         )
-        val maxDistanceFromCenterRightEdge = countLargestDistanceInGridFromPoint(Point(max.x, start.y))
-        var straightLeftSum = 0L
-        var steps = 0
-        var currMinSteps = distanceToFarLeftCenterEdge + 1
-        val gridEndingCounts = listOf(countValidEndingLocationsOriginalGrid, countValidEndingLocationsInLeftGrid)
 
-        while (currMinSteps + maxDistanceFromCenterRightEdge < targetSteps) {
-            steps += 1
-            straightLeftSum += gridEndingCounts[steps % 2]
-            currMinSteps += (max.x + 1)
-        }
-//        steps -= 1
-        val newStartPoint = Point(-((max.x + 1) * steps + 1), start.y)
-        val newStartDist = distance(start, newStartPoint)
-        val countArbitraryGrid = countEndingPointsInArbitraryGrid(
-            listOf(newStartPoint),
-            listOf(newStartDist),
-            targetSteps,
-            Point(newStartPoint.x - (targetSteps - newStartDist), 0),
-//            Point(-(targetSteps - newStartDist) + 5 , 0),
-            Point(newStartPoint.x, max.y)
-        )
-        val leftSumPlusOriginal = straightLeftSum + countValidEndingLocationsOriginalGrid + countArbitraryGrid
+        val leftwardTotalCount =
+            countLeftwards(
+                start,
+                distanceToFarLeftCenterEdge,
+                ogGridValidEndingCount,
+                neighborGridValidEndingCount,
+                targetSteps
+            )
+
+        val leftSumPlusOriginal = leftwardTotalCount + ogGridValidEndingCount
+
         return leftSumPlusOriginal
 
 
@@ -187,6 +174,40 @@ class Day21 {
 ////            .toLong()
 
         return 0
+    }
+
+    private fun countLeftwards(
+        start: Point,
+        distanceToFarLeftCenterEdge: Long,
+        ogGridValidEndingCount: Long,
+        neighborGridValidEndingCount: Long,
+        targetSteps: Long
+    ): Long {
+        val maxDistanceFromCenterRightEdge = countLargestDistanceInGridFromPoint(Point(max.x, start.y))
+        var leftCount = 0L
+        var steps = 0
+        var currMinSteps = distanceToFarLeftCenterEdge + 1
+        val gridEndingCounts = listOf(ogGridValidEndingCount, neighborGridValidEndingCount)
+
+        while (currMinSteps + maxDistanceFromCenterRightEdge < targetSteps) {
+            steps += 1
+            leftCount += gridEndingCounts[steps % 2]
+            currMinSteps += (max.x + 1)
+        }
+        //        steps -= 1
+        val newStartPoint = Point(-((max.x + 1) * steps + 1), start.y)
+        val newStartDist = distance(start, newStartPoint)
+        val leftwardRemainderCount = countEndingPointsInArbitraryGrid(
+            listOf(newStartPoint),
+            listOf(newStartDist),
+            targetSteps,
+            Point(newStartPoint.x - (targetSteps - newStartDist), 0),
+            //            Point(-(targetSteps - newStartDist) + 5 , 0),
+            Point(newStartPoint.x, max.y)
+        )
+
+        val leftwardTotalCount = leftCount + leftwardRemainderCount
+        return leftwardTotalCount
     }
 
     fun distance(p1: Point, p2: Point): Long {
