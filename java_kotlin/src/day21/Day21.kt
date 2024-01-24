@@ -6,6 +6,7 @@ import day16.Point
 import java.io.File
 import java.util.LinkedList
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 
 class Day21 {
@@ -52,7 +53,8 @@ class Day21 {
             distanceToFarLeftCenterEdge + 1,
             targetSteps,
             Point(-(max.x + 1), 0),
-            Point(-1, max.y)
+            Point(-1, max.y),
+            targetSteps
         )
 
         val leftOnlyTotalCount = count(
@@ -221,16 +223,16 @@ class Day21 {
         val newStartDist = distance(start, newStartPoint) + stepsToStart
 
         val finalGridMin = when (dir) {
-            Direction.Left -> Point(newStartPoint.x - (targetSteps - newStartDist), windowMin)
+            Direction.Left -> Point(newStartPoint.x - max(2 * max.x, (targetSteps - newStartDist)), windowMin)
             Direction.Right -> Point(newStartPoint.x, windowMin)
-            Direction.Up -> Point(windowMin, newStartPoint.y - (targetSteps - newStartDist))
+            Direction.Up -> Point(windowMin, newStartPoint.y - max(2 * max.y, (targetSteps - newStartDist)))
             Direction.Down -> Point(windowMin, newStartPoint.y)
         }
         val finalGridMax = when (dir) {
             Direction.Left -> Point(newStartPoint.x, windowMax)
-            Direction.Right -> Point(newStartPoint.x + (targetSteps - newStartDist), windowMax)
+            Direction.Right -> Point(newStartPoint.x + max(2 * max.x, (targetSteps - newStartDist)), windowMax)
             Direction.Up -> Point(windowMax, newStartPoint.y)
-            Direction.Down -> Point(windowMax, newStartPoint.y + (targetSteps - newStartDist))
+            Direction.Down -> Point(windowMax, newStartPoint.y + max(2 * max.y, (targetSteps - newStartDist)))
         }
 
         val remainderCount = countEndingPointsInArbitraryGrid(
@@ -238,7 +240,8 @@ class Day21 {
             newStartDist,
             targetSteps,
             finalGridMin,
-            finalGridMax
+            finalGridMax,
+            maxPossibleDist
         )
 
         // Even at the far end of our reach we need to still branch sideways since
@@ -336,16 +339,21 @@ class Day21 {
     fun countLargestDistanceInGridFromPoint(
         start: Point,
     ): Long {
+        val memoValue = largestDistanceInGridMemo[start]
+        if (memoValue != null) {
+            return memoValue
+        }
+
         val gridValues = fillGridWithDistances(grid, start)
         val result = gridValues
             .filter { it.value != "#" && it.value != "." }
             .map { it.value.toLong() }
             .maxBy { it }
+
+        largestDistanceInGridMemo[start] = result
         return result
 
-//        if (largestDistanceInGridMemo.containsKey(start)) {
-//            return largestDistanceInGridMemo[start]!!
-//        }
+
 //
 //        val gridValues = mutableMapOf<Point, Long>()
 //        grid.keys.forEach {
@@ -364,21 +372,53 @@ class Day21 {
         startingStepCount: Long,
         targetSteps: Long,
         min: Point,
-        max: Point
+        max: Point,
+        maxPossibleDist: Long
     ): Long {
-        val normalizedStart = boundLookup(start)
+        var normalizedStart = boundLookup(start)
+        var normalizedMin = boundLookup(min)
+        var normalizedMax = boundLookup(max)
+        val willExhaustSearchHere = targetSteps - startingStepCount <= maxPossibleDist
 
-        val normalizedMin = boundLookup(min)
-        val normalizedMax = boundLookup(max)
-        println("start:  $start,  min:  $min,  max:  $max")
-        println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
-        println()
+        if (max - min != Day21.max) {
+            val normalTriple = shiftWindowsTowardsOgGrid(start, min, max, Day21.max)
+            normalizedStart = normalTriple.first
+            normalizedMin = normalTriple.second
+            normalizedMax = normalTriple.third
+
+
+//            val v1 = normalizedMax.x >= 0 && normalizedMin.x <= Day21.max.x
+//            val v2 = normalizedMax.y >= 0 && normalizedMin.y <= Day21.max.y
+//            if (!v1 || !v2) {
+//                println("$v1 $v2 nMin: $normalizedMin")
+//            }
+//            assert(v1)
+//            assert(v2)
+        }
+
+        val memoKey = ArbitraryGridMemoKey(normalizedStart, normalizedMin, normalizedMax, min(maxPossibleDist,targetSteps-startingStepCount ))
+
+        val existingValue = countEndingInArbitraryGridMemo[memoKey]
+        if (existingValue != null) {
+            return existingValue
+        }
+
+
+//        println("start:  $start,  min:  $min,  max:  $max")
+//        if (normalizedMax - normalizedMin == Day21.max) {
+//            println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
+//            println("$normalizedMax - $normalizedMin == ${Day21.max}")
+//        } else {
+//            println("XXXXXX nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
+//            println("XXXXXX $normalizedMax - $normalizedMin == ${Day21.max}")
+//        }
+//        println()
 
         val gridToExplore = mutableMapOf<Point, String>()
 //        val gridValues = mutableMapOf<Point, Long>()
 //
-        (min.x..max.x).forEach { x ->
-            (min.y..max.y).forEach { y ->
+        (normalizedMin.x..normalizedMax.x).forEach { x ->
+            (normalizedMin.y..normalizedMax.y).forEach { y ->
                 gridToExplore[Point(x, y)] =
                     getFromRepeatingGrid(Point(x, y)) ?: throw RuntimeException("Need to search infinite grid")
             }
@@ -394,7 +434,7 @@ class Day21 {
 //            }
 //        }
 
-        val gridValues = fillGridWithDistances(gridToExplore, start)
+        val gridValues = fillGridWithDistances(gridToExplore, normalizedStart)
             .filter { it.value != "#" && it.value != "." }
             .map { Pair(it.key, it.value.toLong() + startingStepCount) }
             .toMap()
@@ -417,10 +457,31 @@ class Day21 {
             .filter { it.value <= targetSteps }
         val stepsThatShouldBeViable = stepsInRange
             .filter { (targetSteps - it.value) % 2 == 0L }
-        return stepsInRange
+        val result = stepsInRange
             .map { (targetSteps - it.value) % 2 }
             .count { it == 0L }
             .toLong()
+
+
+//        if (max - min == Day21.max) {
+            val x = countEndingInArbitraryGridMemo[memoKey]
+            if (x != null && x != result) {
+                println("Would have returned wrong value. Real: $result, Wrong: $x")
+                println("$targetSteps - $startingStepCount <= $maxPossibleDist")
+                println("start:  $start,  min:  $min,  max:  $max")
+                println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
+                println()
+            }
+        if (result == 6211L) {
+            println("Would have SAVED wrong value. Real: $result, Wrong: $x")
+            println("$targetSteps - $startingStepCount <= $maxPossibleDist")
+            println("start:  $start,  min:  $min,  max:  $max")
+            println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
+            println()
+        }
+            countEndingInArbitraryGridMemo[memoKey] = result
+//        }
+        return result
     }
 
 
@@ -518,7 +579,15 @@ class Day21 {
         var max: Point = Point(0, 0)
         val memoMap: MutableMap<MemoKey, Map<Point, Long>> = mutableMapOf()
         var searchInfiniteGrid = true
-        val largestDistanceInGridMemo = mutableMapOf<Point, Long>()
+        val countEndingInArbitraryGridMemo: MutableMap<ArbitraryGridMemoKey, Long> = mutableMapOf()
+        val largestDistanceInGridMemo: MutableMap<Point, Long> = mutableMapOf()
+
+        data class ArbitraryGridMemoKey(
+            val nStart: Point,
+            val nMin: Point,
+            val nMax: Point,
+            val remainingStepCount: Long
+        )
 
         data class MemoKey(val targetSteps: Long, val loc: Point, val steps: Long)
 
@@ -539,6 +608,22 @@ class Day21 {
             } else {
                 return grid[loc]
             }
+        }
+
+        fun shiftWindowsTowardsOgGrid(
+            start: Point,
+            min: Point,
+            max: Point,
+            globalMax: Point
+        ): Triple<Point, Point, Point> {
+            val xOffset = min.x - Math.floorMod(min.x, globalMax.x + 1)
+            val yOffset = min.y - Math.floorMod(min.y, globalMax.y + 1)
+
+            return Triple(
+                Point(start.x - xOffset, start.y - yOffset),
+                Point(min.x - xOffset, min.y - yOffset),
+                Point(max.x - xOffset, max.y - yOffset)
+            )
         }
 
         private fun boundLookup(loc: Point): Point {
@@ -570,6 +655,7 @@ class Day21 {
 data class Node(val loc: Point) {
     var prevNode: Node? = null
 }
+
 data class NodeWithCount(val loc: Point) {
     var prevNode: NodeWithCount? = null
     var count: Long = 0

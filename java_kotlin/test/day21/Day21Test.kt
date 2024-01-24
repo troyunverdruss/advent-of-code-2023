@@ -228,7 +228,8 @@ class Day21Test {
             0,
             6,
             Point(0, 0),
-            Day21.max
+            Day21.max,
+            6
         )
         assertEquals(count, 16)
     }
@@ -513,11 +514,9 @@ class Day21Test {
     fun `counting everywhere small grid`() {
         val day = Day21()
 
-//        Day21.initGlobals(smallGridFull)
-//        val start = Point(28,28)
-//
-//
-//
+        Day21.initGlobals(smallGridFull)
+        val start = Point(28,28)
+
 //        Day21.searchInfiniteGrid = false
 //        val bruteForceCount = day.find(27, start, 0).size.toLong()
 //        println(bruteForceCount)
@@ -534,12 +533,28 @@ class Day21Test {
 //        }
 //        Day16.debugPrintGrid(myGrid)
 
+        println("=========== ================ ============== =============")
         Day21.searchInfiniteGrid = true
         val lines = File("inputs/day21.txt").readLines()
-        val smartCount = day.solvePart2(lines, 1_001)
+        val smartCount = day.solvePart2(lines, 26501365)
 //        val smartCount = day.solvePart2(smallGridLines, 27)
 //        assertEquals(smartCount, bruteForceCount)
         println(smartCount)
+    }
+
+    @Test
+    fun testShiftWindows() {
+        val start = Point(-2, 4)
+        val min = Point(-6, 3)
+        val max = Point(-1, 5)
+        val gMax = Point(2,2)
+
+        val r = Day21.shiftWindowsTowardsOgGrid(
+            start, min, max, gMax
+        )
+        assertEquals(r.first, Point(4,1))
+        assertEquals(r.second, Point(0,0))
+        assertEquals(r.third, Point(5,2))
     }
 
 
