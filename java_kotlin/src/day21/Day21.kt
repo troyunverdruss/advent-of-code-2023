@@ -29,14 +29,6 @@ class Day21 {
         initGlobals(lines)
         val start = grid.filter { it.value == "S" }.map { it.key }.first()
 
-        // First explore the original range of the given map
-//        val ogGridWithDistances = grid.toMutableMap()
-//        grid.keys.forEach {
-//            if (grid[it] != "#") {
-//                val steps = minStepsToPoint(start, it)
-//                ogGridWithDistances[it] = "$steps"
-//            }
-//        }
         val ogGridWithDistances = fillGridWithDistances(grid, start)
 
         // This is how many ending points are in the original grid
@@ -116,12 +108,12 @@ class Day21 {
     }
 
     private fun fillGridWithDistances(grid: Map<Point, String>, start: Point): Map<Point, String> {
-        val visited = HashSet<Node>()
-        val toVisit = LinkedList<Node>()
-        val toVisitSet = HashSet<Node>()
+        val visited = HashSet<NodeWithCount>()
+        val toVisit = LinkedList<NodeWithCount>()
+        val toVisitSet = HashSet<NodeWithCount>()
 
-        toVisit.add(Node(start))
-        toVisitSet.add(Node(start))
+        toVisit.add(NodeWithCount(start))
+        toVisitSet.add(NodeWithCount(start))
         while (toVisit.isNotEmpty()) {
             val currNode = toVisit.poll()!!
             toVisitSet.remove(currNode)
@@ -129,10 +121,12 @@ class Day21 {
 
             Direction.entries.forEach { dir ->
                 val nextPoint = currNode.loc + dir.point
+                val nextPoint1 = currNode.loc + dir.point
                 grid[nextPoint]?.let {
                     if (it != "#") {
-                        val toVisitNode = Node(nextPoint)
-                        toVisitNode.prevNode = currNode
+                        val toVisitNode = NodeWithCount(nextPoint)
+                        toVisitNode.count = currNode.count + 1
+//                        toVisitNode.prevNode = currNode
                         if (!toVisitSet.contains(toVisitNode) && !visited.contains(toVisitNode)) {
                             toVisit.add(toVisitNode)
                             toVisitSet.add(toVisitNode)
@@ -142,14 +136,18 @@ class Day21 {
             }
         }
         val filledGrid = grid.toMutableMap()
+
+
         visited.forEach {
-            var steps = 0
-            var prevNode: Node? = it.prevNode
-            while (prevNode != null) {
-                steps += 1
-                prevNode = prevNode.prevNode
-            }
-            filledGrid[it.loc] = "$steps"
+//            var steps = 0L
+//            var prevNode: NodeWithCount? = it.prevNode
+//            while (prevNode != null) {
+//                steps += 1
+//                prevNode = prevNode.prevNode
+//            }
+//                println("${it.count} == $steps")
+//            assert(it.count == steps)
+            filledGrid[it.loc] = "${it.count}"
         }
 
         return filledGrid
@@ -179,37 +177,44 @@ class Day21 {
         var currMinSteps = stepsToStart
         val gridEndingCounts = listOf(ogCountA, countB)
 
-        while (currMinSteps + maxPossibleDist < targetSteps) {
+        if (dir == Direction.Left || dir == Direction.Right) {
+            val pairsThatFit = (targetSteps - stepsToStart - maxPossibleDist) / (2 * (max.x + 1))
+            val pairsSteps = pairsThatFit * gridEndingCounts.sum()
+            steps += pairsSteps
+            gridSteps += pairsThatFit.toInt() * 2
+        } else {
+            while (currMinSteps + maxPossibleDist < targetSteps) {
 
-            gridSteps += 1
-            val newSteps = gridEndingCounts[gridSteps % 2]
-            currMinSteps += when (dir) {
-                Direction.Left, Direction.Right -> (max.x + 1)
-                Direction.Up, Direction.Down -> (max.y + 1)
-            }
-
-            // Each step of the way we need to branch off and count
-            if (dir == Direction.Up || dir == Direction.Down) {
-
-                val branchStart = when (dir) {
-                    Direction.Up -> Point(start.x, start.y - ((max.y + 1) * (gridSteps - 1)))
-                    Direction.Down -> Point(start.x, start.y + ((max.y + 1) * (gridSteps - 1)))
-                    else -> throw NotImplementedError()
+                gridSteps += 1
+                val newSteps = gridEndingCounts[gridSteps % 2]
+                currMinSteps += when (dir) {
+                    Direction.Left, Direction.Right -> (max.x + 1)
+                    Direction.Up, Direction.Down -> (max.y + 1)
                 }
-                val branchSteps = addBranches(
-                    dir,
-                    gridSteps,
-                    branchStart,
-                    windowMin,
-                    targetSteps,
-                    gridEndingCounts,
-                    windowMax,
-                    stepsToStart + distance(start, branchStart)
-                )
-                steps += branchSteps
-            }
 
-            steps += newSteps
+                // Each step of the way we need to branch off and count
+                if (dir == Direction.Up || dir == Direction.Down) {
+
+                    val branchStart = when (dir) {
+                        Direction.Up -> Point(start.x, start.y - ((max.y + 1) * (gridSteps - 1)))
+                        Direction.Down -> Point(start.x, start.y + ((max.y + 1) * (gridSteps - 1)))
+                        else -> throw NotImplementedError()
+                    }
+                    val branchSteps = addBranches(
+                        dir,
+                        gridSteps,
+                        branchStart,
+                        windowMin,
+                        targetSteps,
+                        gridEndingCounts,
+                        windowMax,
+                        stepsToStart + distance(start, branchStart)
+                    )
+                    steps += branchSteps
+                }
+
+                steps += newSteps
+            }
         }
 
         val newStartPoint = computeNewStartPoint(dir, gridSteps, start)
@@ -361,6 +366,14 @@ class Day21 {
         min: Point,
         max: Point
     ): Long {
+        val normalizedStart = boundLookup(start)
+
+        val normalizedMin = boundLookup(min)
+        val normalizedMax = boundLookup(max)
+        println("start:  $start,  min:  $min,  max:  $max")
+        println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
+        println()
+
         val gridToExplore = mutableMapOf<Point, String>()
 //        val gridValues = mutableMapOf<Point, Long>()
 //
@@ -382,7 +395,7 @@ class Day21 {
 //        }
 
         val gridValues = fillGridWithDistances(gridToExplore, start)
-            .filter { it.value != "#" && it.value != "."}
+            .filter { it.value != "#" && it.value != "." }
             .map { Pair(it.key, it.value.toLong() + startingStepCount) }
             .toMap()
 
@@ -556,5 +569,9 @@ class Day21 {
 
 data class Node(val loc: Point) {
     var prevNode: Node? = null
+}
+data class NodeWithCount(val loc: Point) {
+    var prevNode: NodeWithCount? = null
+    var count: Long = 0
 }
 

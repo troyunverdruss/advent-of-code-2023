@@ -29,8 +29,14 @@ class Day16 {
             val minY = grid.keys.minBy { it.y }.y
             val maxY = grid.keys.maxBy { it.y }.y
             (minY..maxY).forEach { y ->
+                if (y % 3 == 0L) {
+                    println("")
+                }
                 (minX..maxX).forEach { x ->
 
+                    if (x % 3 == 0L) {
+                        print("  ")
+                    }
 
                     val v = grid[Point(x, y)]!!
                     if (v == "#") {
@@ -40,14 +46,16 @@ class Day16 {
                     } else {
                         print("$v".padStart(3, ' '))
                     }
-                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L || x == 65L || x == 76L) {
-                        print("  |")
-                    }
+//                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L || x == 65L || x == 76L) {
+//                        print("  |")
+//                    }
+
                 }
                 println()
-                if (y == 10L || y == 21L || y == 32L || y == 43L || y == 54L || y == 65L || y == 76L) {
-                    println("".padStart(200, '-'))
-                }
+//                if (y == 10L || y == 21L || y == 32L || y == 43L || y == 54L || y == 65L || y == 76L) {
+//                    println("".padStart(200, '-'))
+//                }
+
 
             }
         }
@@ -179,6 +187,11 @@ class Day16 {
 data class Point(val x: Long, val y: Long) {
     operator fun plus(point: Point): Point {
         return Point(this.x + point.x, this.y + point.y)
+    }
+
+    operator fun minus(point: Point): Point {
+        return Point(this.x - point.x, this.y - point.y)
+
     }
 }
 
