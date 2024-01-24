@@ -42,7 +42,7 @@ class Day21 {
         // This is how many ending points are in the original grid
         // and since they alternate, we'll need this going forward
         val ogGridValidEndingCount = ogGridWithDistances
-            .filter { it.value != "#" }
+            .filter { it.value != "#" && it.value != "." }
             .map { (targetSteps - it.value.toLong()) % 2 }
             .count { it == 0L }
             .toLong()
@@ -333,7 +333,7 @@ class Day21 {
     ): Long {
         val gridValues = fillGridWithDistances(grid, start)
         val result = gridValues
-            .filter { it.value != "#" }
+            .filter { it.value != "#" && it.value != "." }
             .map { it.value.toLong() }
             .maxBy { it }
         return result
@@ -362,24 +362,34 @@ class Day21 {
         max: Point
     ): Long {
         val gridToExplore = mutableMapOf<Point, String>()
-        val gridValues = mutableMapOf<Point, Long>()
-
+//        val gridValues = mutableMapOf<Point, Long>()
+//
         (min.x..max.x).forEach { x ->
             (min.y..max.y).forEach { y ->
                 gridToExplore[Point(x, y)] =
                     getFromRepeatingGrid(Point(x, y)) ?: throw RuntimeException("Need to search infinite grid")
             }
         }
+//
+//        gridToExplore.keys.forEach {
+//            if (gridToExplore[it] != "#") {
+//                val steps = minStepsToPoint(start, it)
+//                val currVal = gridValues[it] ?: Long.MAX_VALUE
+//                gridValues[it] = min(steps + startingStepCount, currVal)
+//            } else {
+////                    gridValues[it] = -1L
+//            }
+//        }
 
-        gridToExplore.keys.forEach {
-            if (gridToExplore[it] != "#") {
-                val steps = minStepsToPoint(start, it)
-                val currVal = gridValues[it] ?: Long.MAX_VALUE
-                gridValues[it] = min(steps + startingStepCount, currVal)
-            } else {
-//                    gridValues[it] = -1L
-            }
-        }
+        val gridValues = fillGridWithDistances(gridToExplore, start)
+            .filter { it.value != "#" && it.value != "."}
+            .map { Pair(it.key, it.value.toLong() + startingStepCount) }
+            .toMap()
+
+//        if (gridValues != gridValues2) {
+//            // breka
+//            val i =0
+//        }
 
 
 //        debugPrintGrid(gridToExplore)
