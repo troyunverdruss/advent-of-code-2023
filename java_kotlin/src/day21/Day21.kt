@@ -141,14 +141,6 @@ class Day21 {
 
 
         visited.forEach {
-//            var steps = 0L
-//            var prevNode: NodeWithCount? = it.prevNode
-//            while (prevNode != null) {
-//                steps += 1
-//                prevNode = prevNode.prevNode
-//            }
-//                println("${it.count} == $steps")
-//            assert(it.count == steps)
             filledGrid[it.loc] = "${it.count}"
         }
 
@@ -352,19 +344,6 @@ class Day21 {
 
         largestDistanceInGridMemo[start] = result
         return result
-
-
-//
-//        val gridValues = mutableMapOf<Point, Long>()
-//        grid.keys.forEach {
-//            if (grid[it] != "#") {
-//                val steps = minStepsToPoint(start, it)
-//                gridValues[it] = steps
-//            }
-//        }
-//        val result = gridValues.maxBy { it.value }.value
-//        largestDistanceInGridMemo[start] = result
-//        return result
     }
 
     fun countEndingPointsInArbitraryGrid(
@@ -378,80 +357,39 @@ class Day21 {
         var normalizedStart = boundLookup(start)
         var normalizedMin = boundLookup(min)
         var normalizedMax = boundLookup(max)
-        val willExhaustSearchHere = targetSteps - startingStepCount <= maxPossibleDist
 
         if (max - min != Day21.max) {
             val normalTriple = shiftWindowsTowardsOgGrid(start, min, max, Day21.max)
             normalizedStart = normalTriple.first
             normalizedMin = normalTriple.second
             normalizedMax = normalTriple.third
-
-
-//            val v1 = normalizedMax.x >= 0 && normalizedMin.x <= Day21.max.x
-//            val v2 = normalizedMax.y >= 0 && normalizedMin.y <= Day21.max.y
-//            if (!v1 || !v2) {
-//                println("$v1 $v2 nMin: $normalizedMin")
-//            }
-//            assert(v1)
-//            assert(v2)
         }
 
-        val memoKey = ArbitraryGridMemoKey(normalizedStart, normalizedMin, normalizedMax, min(maxPossibleDist,targetSteps-startingStepCount ))
+        val memoKey = ArbitraryGridMemoKey(
+            normalizedStart,
+            normalizedMin,
+            normalizedMax,
+            min(maxPossibleDist, targetSteps - startingStepCount)
+        )
 
         val existingValue = countEndingInArbitraryGridMemo[memoKey]
         if (existingValue != null) {
             return existingValue
         }
 
-
-//        println("start:  $start,  min:  $min,  max:  $max")
-//        if (normalizedMax - normalizedMin == Day21.max) {
-//            println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
-//            println("$normalizedMax - $normalizedMin == ${Day21.max}")
-//        } else {
-//            println("XXXXXX nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
-//            println("XXXXXX $normalizedMax - $normalizedMin == ${Day21.max}")
-//        }
-//        println()
-
         val gridToExplore = mutableMapOf<Point, String>()
-//        val gridValues = mutableMapOf<Point, Long>()
-//
+
         (normalizedMin.x..normalizedMax.x).forEach { x ->
             (normalizedMin.y..normalizedMax.y).forEach { y ->
                 gridToExplore[Point(x, y)] =
                     getFromRepeatingGrid(Point(x, y)) ?: throw RuntimeException("Need to search infinite grid")
             }
         }
-//
-//        gridToExplore.keys.forEach {
-//            if (gridToExplore[it] != "#") {
-//                val steps = minStepsToPoint(start, it)
-//                val currVal = gridValues[it] ?: Long.MAX_VALUE
-//                gridValues[it] = min(steps + startingStepCount, currVal)
-//            } else {
-////                    gridValues[it] = -1L
-//            }
-//        }
 
         val gridValues = fillGridWithDistances(gridToExplore, normalizedStart)
-            .filter { it.value != "#" && it.value != "." }
+            .filter { it.value != "#" && it.value != "." && it.value != "S"}
             .map { Pair(it.key, it.value.toLong() + startingStepCount) }
             .toMap()
-
-//        if (gridValues != gridValues2) {
-//            // breka
-//            val i =0
-//        }
-
-
-//        debugPrintGrid(gridToExplore)
-//        debugPrintGrid(
-//            gridValues
-//
-//                .map { Pair(it.key, it.value.toString()) }.toMap()
-//        )
-
 
         val stepsInRange = gridValues
             .filter { it.value <= targetSteps }
@@ -462,28 +400,9 @@ class Day21 {
             .count { it == 0L }
             .toLong()
 
-
-//        if (max - min == Day21.max) {
-            val x = countEndingInArbitraryGridMemo[memoKey]
-            if (x != null && x != result) {
-                println("Would have returned wrong value. Real: $result, Wrong: $x")
-                println("$targetSteps - $startingStepCount <= $maxPossibleDist")
-                println("start:  $start,  min:  $min,  max:  $max")
-                println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
-                println()
-            }
-        if (result == 6211L) {
-            println("Would have SAVED wrong value. Real: $result, Wrong: $x")
-            println("$targetSteps - $startingStepCount <= $maxPossibleDist")
-            println("start:  $start,  min:  $min,  max:  $max")
-            println("nStart: $normalizedStart,  nMin: $normalizedMin,  nMax: $normalizedMax")
-            println()
-        }
-            countEndingInArbitraryGridMemo[memoKey] = result
-//        }
+        countEndingInArbitraryGridMemo[memoKey] = result
         return result
     }
-
 
     fun minStepsToPoint(start: Point, dest: Point): Long {
         if (start == dest) {
@@ -525,7 +444,6 @@ class Day21 {
         throw RuntimeException("Could not find path to node")
     }
 
-
     fun find(targetSteps: Long, loc: Point, steps: Long): Map<Point, Long> {
         val key = MemoKey(targetSteps, loc, steps)
         memoMap[key]?.let {
@@ -542,22 +460,13 @@ class Day21 {
         val result = Direction.entries.flatMap { dir ->
             val nextPoint = loc + dir.point
 
-//            if (grid.keys.contains(nextPoint)) {
             getFromRepeatingGrid(nextPoint).let { gridValue ->
-//                if (gridValue == null ) {
-//                    throw RuntimeException("Require inifinite grid")
-//                }
                 if (gridValue != "#" && gridValue != null) {
                     listOf(find(targetSteps, nextPoint, steps + 1))
                 } else {
                     listOf(mapOf())
                 }
             }
-//            } else {
-//                listOf(mapOf())
-//            }
-
-
         }
 
         val resultMap = mutableMapOf<Point, Long>()
@@ -567,7 +476,6 @@ class Day21 {
                 resultMap[e.key] = currVal + e.value
             }
         }
-
 
         memoMap[key] = resultMap
         return resultMap

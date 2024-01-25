@@ -5,7 +5,6 @@ import day16.Direction
 import day16.Point
 import org.testng.Assert.*
 import org.testng.annotations.Test
-import java.io.File
 
 class Day21Test {
 
@@ -389,18 +388,18 @@ class Day21Test {
 
         Day21.searchInfiniteGrid = false
         val bruteForceCount = day.find(33, start, 0).size.toLong()
-
-        val myGrid = Day21.grid.toMutableMap()
-        Day21.grid.keys.forEach {
-            if (Day21.grid[it] != "#") {
-                val steps = day.minStepsToPoint(start, it)
-                myGrid[it] = "$steps"
-                if (steps <= 33 && (33 - steps) % 2 == 0L) {
-//                    myGrid[it] = "x"
-                }
-            }
-        }
-        Day16.debugPrintGrid(myGrid)
+//
+//        val myGrid = Day21.grid.toMutableMap()
+//        Day21.grid.keys.forEach {
+//            if (Day21.grid[it] != "#") {
+//                val steps = day.minStepsToPoint(start, it)
+//                myGrid[it] = "$steps"
+//                if (steps <= 33 && (33 - steps) % 2 == 0L) {
+////                    myGrid[it] = "x"
+//                }
+//            }
+//        }
+//        Day16.debugPrintGrid(myGrid)
 
 
 
@@ -517,10 +516,10 @@ class Day21Test {
         Day21.initGlobals(smallGridFull)
         val start = Point(28,28)
 
-//        Day21.searchInfiniteGrid = false
-//        val bruteForceCount = day.find(27, start, 0).size.toLong()
-//        println(bruteForceCount)
-//
+        Day21.searchInfiniteGrid = false
+        val bruteForceCount = day.find(27, start, 0).size.toLong()
+        println(bruteForceCount)
+
 //        val myGrid = Day21.grid.toMutableMap()
 //        Day21.grid.keys.forEach {
 //            if (Day21.grid[it] != "#") {
@@ -533,13 +532,9 @@ class Day21Test {
 //        }
 //        Day16.debugPrintGrid(myGrid)
 
-        println("=========== ================ ============== =============")
         Day21.searchInfiniteGrid = true
-        val lines = File("inputs/day21.txt").readLines()
-        val smartCount = day.solvePart2(lines, 26501365)
-//        val smartCount = day.solvePart2(smallGridLines, 27)
-//        assertEquals(smartCount, bruteForceCount)
-        println(smartCount)
+        val smartCount = day.solvePart2(smallGridLines, 27)
+        assertEquals(smartCount, bruteForceCount)
     }
 
     @Test
