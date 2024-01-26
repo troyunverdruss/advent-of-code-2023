@@ -1,6 +1,7 @@
 package day16
 
 import java.io.File
+import kotlin.math.abs
 import kotlin.math.max
 
 
@@ -184,15 +185,22 @@ class Day16 {
     }
 }
 
-data class Point(val x: Long, val y: Long) {
+data class Point(val x: Long, val y: Long, val z: Long = 0) {
     operator fun plus(point: Point): Point {
-        return Point(this.x + point.x, this.y + point.y)
+        return Point(this.x + point.x, this.y + point.y, this.z + point.z)
     }
 
     operator fun minus(point: Point): Point {
-        return Point(this.x - point.x, this.y - point.y)
+        return Point(this.x - point.x, this.y - point.y, this.z - point.z)
 
     }
+
+    companion object {
+        fun distance(p1: Point, p2: Point): Long {
+            return abs(p2.x - p1.x) + abs(p2.y - p1.y) + abs(p2.z - p2.z)
+        }
+    }
+
 }
 
 data class EnergizerData(val directions: HashSet<Direction>)

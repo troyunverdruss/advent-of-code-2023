@@ -202,7 +202,7 @@ class Day21 {
                         targetSteps,
                         gridEndingCounts,
                         windowMax,
-                        stepsToStart + distance(start, branchStart)
+                        stepsToStart + Point.distance(start, branchStart)
                     )
                     steps += branchSteps
                 }
@@ -212,7 +212,7 @@ class Day21 {
         }
 
         val newStartPoint = computeNewStartPoint(dir, gridSteps, start)
-        val newStartDist = distance(start, newStartPoint) + stepsToStart
+        val newStartDist = Point.distance(start, newStartPoint) + stepsToStart
 
         val finalGridMin = when (dir) {
             Direction.Left -> Point(newStartPoint.x - max(2 * max.x, (targetSteps - newStartDist)), windowMin)
@@ -252,7 +252,7 @@ class Day21 {
                 targetSteps,
                 gridEndingCounts,
                 windowMax,
-                stepsToStart + distance(start, branchStart)
+                stepsToStart + Point.distance(start, branchStart)
             )
             steps += remainderBranchesCount
         }
@@ -289,7 +289,7 @@ class Day21 {
             val newCenterStartPoint = computeNewStartPoint(dir, gridSteps - 1, start)
 
             val newLeftStart = Point(windowMin - 1, newCenterStartPoint.y)
-            val distToLeftStart = distance(start, newLeftStart) + stepsToStart
+            val distToLeftStart = Point.distance(start, newLeftStart) + stepsToStart
             leftSteps = count(
                 newLeftStart,
                 distToLeftStart,
@@ -302,7 +302,7 @@ class Day21 {
 
             )
             val newRightStart = Point(windowMax + 1, newCenterStartPoint.y)
-            val distToRightStart = distance(start, newRightStart) + stepsToStart
+            val distToRightStart = Point.distance(start, newRightStart) + stepsToStart
             rightSteps = count(
                 newRightStart,
                 distToRightStart,
@@ -322,10 +322,6 @@ class Day21 {
         Direction.Right -> Point(((max.x + 1) * (gridSteps + 1)), start.y)
         Direction.Up -> Point(start.x, -((max.y + 1) * gridSteps + 1))
         Direction.Down -> Point(start.x, ((max.y + 1) * (gridSteps + 1)))
-    }
-
-    fun distance(p1: Point, p2: Point): Long {
-        return abs(p2.x - p1.x) + abs(p2.y - p1.y)
     }
 
     fun countLargestDistanceInGridFromPoint(
