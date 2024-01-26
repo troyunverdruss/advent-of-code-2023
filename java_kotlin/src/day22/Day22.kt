@@ -2,6 +2,7 @@ package day22
 
 import day16.Point
 import java.io.File
+import kotlin.math.min
 
 class Day22 {
     fun part1(): Int {
@@ -9,6 +10,7 @@ class Day22 {
         val result = solvePart1(lines)
         return result
     }
+
     fun part2(): Long {
         val lines = File("inputs/day22.txt").readLines()
         val result = solvePart2(lines)

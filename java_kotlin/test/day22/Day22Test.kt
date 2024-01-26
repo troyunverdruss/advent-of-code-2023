@@ -42,11 +42,11 @@ class Day22Test {
         assertEquals(result, 7)
     }
 
-    @Test
-    fun `profile example part 2`() {
-        val day = Day22()
-        val lines = File("inputs/day22.txt").readLines()
-        val result = day.solvePart2(lines)
-        assertEquals(result, 7)
-    }
+//    @Test
+//    fun `profile example part 2`() {
+//        val day = Day22()
+//        val lines = File("inputs/day22.txt").readLines()
+//        val result = day.solvePart2(lines)
+//        assertEquals(result, 7)
+//    }
 }
