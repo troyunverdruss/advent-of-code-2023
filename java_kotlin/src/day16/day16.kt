@@ -30,26 +30,27 @@ class Day16 {
             val minY = grid.keys.minBy { it.y }.y
             val maxY = grid.keys.maxBy { it.y }.y
             (minY..maxY).forEach { y ->
-                if (y % 3 == 0L) {
-                    println("")
-                }
+//                if (y % 3 == 0L) {
+//                    println("")
+//                }
                 (minX..maxX).forEach { x ->
+                    print(grid[Point(x, y)]!!)
 
-                    if (x % 3 == 0L) {
-                        print("  ")
-                    }
-
-                    val v = grid[Point(x, y)]!!
-                    if (v == "#") {
-                        print("$v".padStart(3, ' '))
-//                    } else if ( v.toInt() % 2 == 0) {
-//                        print("x".padStart(3, ' '))
-                    } else {
-                        print("$v".padStart(3, ' '))
-                    }
-//                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L || x == 65L || x == 76L) {
-//                        print("  |")
+//                    if (x % 3 == 0L) {
+//                        print("  ")
 //                    }
+//
+//                    val v = grid[Point(x, y)]!!
+//                    if (v == "#") {
+//                        print("$v".padStart(3, ' '))
+////                    } else if ( v.toInt() % 2 == 0) {
+////                        print("x".padStart(3, ' '))
+//                    } else {
+//                        print("$v".padStart(3, ' '))
+//                    }
+////                    if (x == 10L || x == 21L || x == 32L || x == 43L || x == 54L || x == 65L || x == 76L) {
+////                        print("  |")
+////                    }
 
                 }
                 println()
