@@ -4,6 +4,9 @@ import day16.Day16
 import day16.Direction
 import day16.Point
 import java.io.File
+import java.util.*
+import kotlin.collections.LinkedHashSet
+import kotlin.math.max
 
 class Day23 {
     fun part1(): Long {
@@ -31,12 +34,49 @@ class Day23 {
             isAllowed,
             grid,
             start,
-            end,
-            LinkedHashSet()
+            end
         )
+//        return findLongestPathRecursive(
+//            isAllowed,
+//            grid,
+//            start,
+//            end,
+//            LinkedHashSet()
+//        )
     }
 
     fun findLongestPath(
+        isAllowed: (Point, Set<Point>, Direction, String) -> Boolean,
+        grid: Map<Point, String>,
+        start: Point,
+        dest: Point,
+    ): Long {
+        var longestPath = -1L
+        val stack = Stack<State>()
+        val visited: LinkedHashSet<Point> = LinkedHashSet()
+        visited.addLast(start)
+        Direction.entries.forEach { stack.push(State(visited.size, it)) }
+
+        while (stack.isNotEmpty()) {
+            val state = stack.pop()
+            while (visited.size > state.visitedCount) {
+                visited.removeLast()
+            }
+            val nextStep = visited.last + state.dir.point
+            if (nextStep == dest) {
+                longestPath = max(longestPath, visited.size.toLong())
+            } else if (isAllowed(nextStep, visited, state.dir, grid[nextStep] ?: "#")) {
+                visited.add(nextStep)
+                Direction.entries.forEach { stack.push(State(visited.size, it)) }
+            }
+        }
+
+        return longestPath
+    }
+
+    data class State(val visitedCount: Int, val dir: Direction)
+
+    fun findLongestPathRecursive(
         isAllowed: (Point, Set<Point>, Direction, String) -> Boolean,
         grid: Map<Point, String>,
         loc: Point,
@@ -59,7 +99,7 @@ class Day23 {
             val testLoc = loc + dir.point
             val allowed = isAllowed(testLoc, visited, dir, grid[testLoc] ?: "#")
             if (allowed) {
-                findLongestPath(isAllowed, grid, testLoc, dest, visited)
+                findLongestPathRecursive(isAllowed, grid, testLoc, dest, visited)
             } else 0L
         }.max()
 
