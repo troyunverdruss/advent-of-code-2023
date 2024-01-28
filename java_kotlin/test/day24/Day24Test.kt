@@ -15,6 +15,6 @@ class Day24Test {
     @Test
     fun `part 1 example`() {
         val day = Day24()
-        assertEquals(day.solvePart1(lines, 7L, 27L), 2)
+        assertEquals(day.solvePart1(lines, 7.0, 27.0), 2)
     }
 }

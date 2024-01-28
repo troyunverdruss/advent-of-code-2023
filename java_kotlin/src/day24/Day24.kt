@@ -5,10 +5,10 @@ import java.io.File
 class Day24 {
     fun part1(): Long {
         val lines = File("inputs/day24.txt").readLines()
-        return solvePart1(lines, 200000000000000L, 400000000000000L)
+        return solvePart1(lines, 200000000000000.0, 400000000000000.0)
     }
 
-    fun solvePart1(lines: List<String>, min: Long, max: Long): Long {
+    fun solvePart1(lines: List<String>, min: Double, max: Double): Long {
         val equations = lines.map(Equation::parseLine)
 
         return equations.flatMapIndexed { index, eq1 ->
@@ -18,7 +18,7 @@ class Day24 {
                     val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
                     val yIntersect = (eq1.m * xIntersect) + eq1.b
                     val yIntersect2 = (eq2.m * xIntersect) + eq2.b
-                    println("$yIntersect == $yIntersect2")
+//                    println("$yIntersect == $yIntersect2")
 //                    assert(yIntersect == yIntersect2)
 
 //                    println(eq1)
@@ -60,8 +60,8 @@ class Day24 {
         return isPossibleEq1x && isPossibleEq2x && isPossibleEq1y && isPossibleEq2y
     }
 
-    private fun isIntersectionInWindow(xIntersect: Double, yIntersect: Double, min: Long, max: Long) =
-        xIntersect.toLong() in min..max && yIntersect.toLong() in min..max
+    private fun isIntersectionInWindow(xIntersect: Double, yIntersect: Double, min: Double, max: Double) =
+        xIntersect in min..max && yIntersect in min..max
 }
 
 data class Equation(val m: Double, val b: Double, val loc: PointDouble, val vec: PointDouble) {
