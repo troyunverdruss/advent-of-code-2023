@@ -1,5 +1,4 @@
-import day22.Day22
-import day23.Day23
+import day24.Day24
 
 fun main() {
 //    println("Day 6")
@@ -62,9 +61,14 @@ fun main() {
 //    val day22 = Day22()
 //    println(day22.part1())
 //    println(day22.part2())
+//
+//    println("Day 23")
+//    val day23 = Day23()
+//    println(day23.part1())
+//    println(day23.part2())
 
-    println("Day 23")
-    val day23 = Day23()
-    println(day23.part1())
-    println(day23.part2())
+    println("Day 24")
+    val day24 = Day24()
+    println(day24.part1()) //12631 too low, 15596 too high
+//    println(day24.part2())
 }
