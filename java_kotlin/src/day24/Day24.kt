@@ -29,7 +29,28 @@ class Day24 {
                     val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
 
                     intersectionInWindow && intersectionInFuture
-                } else false
+                } else {
+//                    if (eq1.vec != eq2.vec) {
+                        println("Opposites:")
+                        println(eq1)
+                        println(eq2)
+                        val i = 0
+
+                        if ((eq1.vec.x/eq1.vec.y) == (eq2.vec.x / eq2.vec.y)) {
+                            // Will collide, but within the window?
+                            val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
+                            val yIntersect = (eq1.m * xIntersect) + eq1.b
+                            val intersectionInWindow = isIntersectionInWindow(xIntersect, yIntersect, min, max)
+                            val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
+
+                            intersectionInWindow && intersectionInFuture
+                        } else {
+                            false
+//                        }
+//                    } else {
+                        false
+                    }
+                }
             }
         }.count { it }.toLong()
     }
