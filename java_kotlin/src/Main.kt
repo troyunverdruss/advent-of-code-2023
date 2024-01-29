@@ -1,3 +1,4 @@
+import day24.Day24Orig
 import day24.Day24
 
 fun main() {

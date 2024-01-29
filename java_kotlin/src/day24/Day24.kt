@@ -9,115 +9,58 @@ class Day24 {
     }
 
     fun solvePart1(lines: List<String>, min: Double, max: Double): Long {
-        val equations = lines.map(Equation::parseLine)
-
-        return equations.flatMapIndexed { index, eq1 ->
-            equations.subList(index, equations.lastIndex).map { eq2 ->
-                // Calculate x intersect point
-                if (eq1.m != eq2.m) {
-                    val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
-                    val yIntersect = (eq1.m * xIntersect) + eq1.b
-                    val yIntersect2 = (eq2.m * xIntersect) + eq2.b
-//                    println("$yIntersect == $yIntersect2")
-//                    assert(yIntersect == yIntersect2)
-
-//                    println(eq1)
-//                    println(eq2)
-//                    println("$xIntersect, $yIntersect")
-
-                    val intersectionInWindow = isIntersectionInWindow(xIntersect, yIntersect, min, max)
-                    val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
-
-                    intersectionInWindow && intersectionInFuture
-                } else {
-//                    if (eq1.vec != eq2.vec) {
-                        println("Opposites:")
-                        println(eq1)
-                        println(eq2)
-                        val i = 0
-
-                        if ((eq1.vec.x/eq1.vec.y) == (eq2.vec.x / eq2.vec.y)) {
-                            // Will collide, but within the window?
-                            val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
-                            val yIntersect = (eq1.m * xIntersect) + eq1.b
-                            val intersectionInWindow = isIntersectionInWindow(xIntersect, yIntersect, min, max)
-                            val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
-
-                            intersectionInWindow && intersectionInFuture
-                        } else {
-                            false
-//                        }
-//                    } else {
-                        false
-                    }
+        val rays = lines.map { parseLine(it) }
+        val intersections = rays.flatMapIndexed { index, r1 ->
+            if (index + 1 < rays.lastIndex) {
+                rays.subList(index + 1, rays.lastIndex).map { r2 ->
+                    val i = intersection(r1, r2)
+                    println("$r1")
+                    println("$r2")
+                    println("$i")
+                    println()
+                    i
                 }
+            } else listOf()
+        }.filterNotNull()
+            .filter {
+                it.x in min..max && it.y in min..max
             }
-        }.count { it }.toLong()
+        return intersections.size.toLong()
     }
 
-    private fun isIntersectionInFuture(xIntersect: Double, yIntersect: Double, eq1: Equation, eq2: Equation): Boolean {
-        // Is eq1 possible
-        val isPossibleEq1x = if (xIntersect >= eq1.loc.x) {
-            eq1.vec.x >= 0
-        } else {
-            eq1.vec.x < 0
-        }
-        val isPossibleEq2x = if (xIntersect >= eq2.loc.x) {
-            eq2.vec.x >= 0
-        } else {
-            eq2.vec.x < 0
-        }
-        val isPossibleEq1y = if (yIntersect >= eq1.loc.y) {
-            eq1.vec.y >= 0
-        } else {
-            eq1.vec.y < 0
-        }
-        val isPossibleEq2y = if (yIntersect >= eq2.loc.y) {
-            eq2.vec.y >= 0
-        } else {
-            eq2.vec.y < 0
-        }
+    fun parseLine(line: String): Ray {
+        val parts = line.replace(" ", "").split("@")
+        val locParts = parts[0].split(",")
+        val vecParts = parts[1].split(",")
 
-        return isPossibleEq1x && isPossibleEq2x && isPossibleEq1y && isPossibleEq2y
+        val loc = RayOrigin(locParts[0].toDouble(), locParts[1].toDouble(), locParts[2].toDouble())
+        val vel = RayVector(vecParts[0].toDouble(), vecParts[1].toDouble(), vecParts[2].toDouble())
+
+        return Ray(loc, vel)
     }
 
-    private fun isIntersectionInWindow(xIntersect: Double, yIntersect: Double, min: Double, max: Double) =
-        xIntersect in min..max && yIntersect in min..max
+    fun intersection(r1: Ray, r2: Ray): PointDouble? {
+        val dx = r2.loc.x - r1.loc.x
+        val dy = r2.loc.y - r1.loc.y
+        val det = r1.vel.y * r2.vel.x - r2.vel.y * r1.vel.x
+
+        // what if det == 0 ?? lines overlap or are parallel
+
+        val u = (r2.vel.x * dy - r2.vel.y * dx) / det
+        val v = (r1.vel.x * dy - r1.vel.y * dx) / det
+        if (u < 0 || v < 0) {
+            return null
+        }
+
+        return PointDouble(
+            r1.loc.x + r1.vel.x * u,
+            r1.loc.y + r1.vel.y * u
+        )
+    }
+
 }
 
-data class Equation(val m: Double, val b: Double, val loc: PointDouble, val vec: PointDouble) {
-    companion object {
-        fun parseLine(line: String): Equation {
-            val parts = line.replace(" ", "").split("@")
-            val locParts = parts[0].split(",")
-            val vecParts = parts[1].split(",")
-
-            val loc = PointDouble(locParts[0].toDouble(), locParts[1].toDouble(), locParts[2].toDouble())
-            val vec = PointDouble(vecParts[0].toDouble(), vecParts[1].toDouble(), vecParts[2].toDouble())
-            val m = normalizeSlopeData(vec)
-            assert(m.x == 1.0)
-            val b = loc.x * (-1F * m.y) + loc.y
-            return Equation(m.y, b, loc, vec)
-        }
-
-        fun normalizeSlopeData(vec: PointDouble): PointDouble {
-            var x = vec.x
-            var y = vec.y
-            if (x < 0) {
-                x *= -1
-                y *= -1
-            }
-            if (x > 1) {
-                y /= x
-                x /= x
-            }
-            return PointDouble(x, y)
-        }
-    }
-
-    override fun toString(): String {
-        return "$loc @ $vec"
-    }
-}
-
-data class PointDouble(val x: Double, val y: Double, val z: Double = 0.0)
+data class IntersectionResult(val intersect: Boolean, val intersection: PointDouble?)
+data class Ray(val loc: RayOrigin, val vel: RayVector)
+data class RayOrigin(val x: Double, val y: Double, val z: Double = 0.0)
+data class RayVector(val x: Double, val y: Double, val z: Double = 0.0)
