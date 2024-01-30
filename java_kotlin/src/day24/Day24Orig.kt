@@ -13,13 +13,12 @@ class Day24Orig {
 
         return equations.flatMapIndexed { index, eq1 ->
 
-            if (index + 1 < equations.lastIndex) {
-                equations.subList(index + 1, equations.lastIndex).map { eq2 ->
-                    // Calculate x intersect point
-                    if (eq1.m != eq2.m) {
-                        val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
-                        val yIntersect = (eq1.m * xIntersect) + eq1.b
-                        val yIntersect2 = (eq2.m * xIntersect) + eq2.b
+            equations.subList(index + 1, equations.size).map { eq2 ->
+                // Calculate x intersect point
+                if (eq1.m != eq2.m) {
+                    val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
+                    val yIntersect = (eq1.m * xIntersect) + eq1.b
+                    val yIntersect2 = (eq2.m * xIntersect) + eq2.b
 //                    println("$yIntersect == $yIntersect2")
 //                    assert(yIntersect == yIntersect2)
 
@@ -27,32 +26,30 @@ class Day24Orig {
 //                    println(eq2)
 //                    println("$xIntersect, $yIntersect")
 
+                    val intersectionInWindow = isIntersectionInWindow(xIntersect, yIntersect, min, max)
+                    val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
+
+                    intersectionInWindow && intersectionInFuture
+                } else {
+//                    if (eq1.vec != eq2.vec) {
+//                    println("Opposites:")
+//                    println(eq1)
+//                    println(eq2)
+//                    val i = 0
+
+                    if ((eq1.vec.x / eq1.vec.y) == (eq2.vec.x / eq2.vec.y)) {
+                        // Will collide, but within the window?
+                        val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
+                        val yIntersect = (eq1.m * xIntersect) + eq1.b
                         val intersectionInWindow = isIntersectionInWindow(xIntersect, yIntersect, min, max)
                         val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
 
                         intersectionInWindow && intersectionInFuture
                     } else {
-//                    if (eq1.vec != eq2.vec) {
-                        println("Opposites:")
-                        println(eq1)
-                        println(eq2)
-                        val i = 0
-
-                        if ((eq1.vec.x / eq1.vec.y) == (eq2.vec.x / eq2.vec.y)) {
-                            // Will collide, but within the window?
-                            val xIntersect = (eq2.b - eq1.b) / (eq1.m - eq2.m)
-                            val yIntersect = (eq1.m * xIntersect) + eq1.b
-                            val intersectionInWindow = isIntersectionInWindow(xIntersect, yIntersect, min, max)
-                            val intersectionInFuture = isIntersectionInFuture(xIntersect, yIntersect, eq1, eq2)
-
-                            intersectionInWindow && intersectionInFuture
-                        } else {
-                            false
-                        }
+                        false
                     }
                 }
-
-            } else listOf()
+            }
         }.count { it }.toLong()
     }
 

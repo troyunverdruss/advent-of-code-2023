@@ -70,6 +70,8 @@ fun main() {
 
     println("Day 24")
     val day24 = Day24()
+    val day24Orig = Day24Orig()
     println(day24.part1()) //12631 too low, 15596 too high
+    println(day24Orig.part1()) //12631 too low, 15596 too high
 //    println(day24.part2())
 }
