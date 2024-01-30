@@ -1,6 +1,13 @@
 package day24
 
+import io.ksmt.KContext
+import io.ksmt.expr.rewrite.simplify.toRealValue
+import io.ksmt.solver.KSolverStatus
+import io.ksmt.solver.z3.KZ3Solver
+import io.ksmt.utils.getValue
+import it.unimi.dsi.fastutil.ints.IntSet
 import java.io.File
+import kotlin.time.Duration.Companion.seconds
 
 class Day24 {
     fun part1(): Long {
@@ -25,6 +32,77 @@ class Day24 {
                 it.x in min..max && it.y in min..max
             }
         return intersections.size.toLong()
+    }
+
+    fun solvePart2(lines: List<String>): Long {
+        val rays = lines.map { parseLine(it) }
+
+        var ansX = 0L
+        var ansY = 0L
+        var ansZ = 0L
+
+        val ctx = KContext()
+        with(ctx) {
+            KZ3Solver(this).use { solver ->
+
+                // t must be positive
+//                val t by intSort
+//                val tPositiveConstraint = t gt 0.expr
+//                solver.assert(tPositiveConstraint)
+
+                // setup the perfect stone
+                val sx by intSort
+                val sy by intSort
+                val sz by intSort
+                val svx by intSort
+                val svy by intSort
+                val svz by intSort
+
+//                val sxConstraint = sx + (t * svx)
+//                val syConstraint = sy + (t * svy)
+//                val szConstraint = sz + (t * svz)
+
+                var rayId = 0
+                for (ray in rays.subList(0, 3)) {
+                    rayId += 1
+                    println(rayId)
+                    val t = mkConst("t$rayId", intSort)
+//                    val t by intSort
+//                    val t = mk()
+                    val tPositiveConstraint = t ge 0.expr
+                    solver.assert(tPositiveConstraint)
+
+                    val sxConstraint = sx + (t * svx)
+                    val syConstraint = sy + (t * svy)
+                    val szConstraint = sz + (t * svz)
+
+//                    val rt by intSort
+                    val rxConstraint = ray.loc.x.toLong().expr + (t * ray.vel.x.toLong().expr)
+                    val ryConstraint = ray.loc.y.toLong().expr + (t * ray.vel.y.toLong().expr)
+                    val rzConstraint = ray.loc.z.toLong().expr + (t * ray.vel.z.toLong().expr)
+                    solver.assertAndTrack(sxConstraint eq rxConstraint)
+                    solver.assertAndTrack(syConstraint eq ryConstraint)
+                    solver.assertAndTrack(szConstraint eq rzConstraint)
+
+                    val satisfiability = solver.check()
+                    println(satisfiability) // SAT
+                }
+                val model = solver.model()
+
+                ansX = model.eval(sx).toRealValue()?.let {
+                    it.numerator.toLong() / it.denominator.toLong()
+                } ?: throw RuntimeException("no sx found")
+                ansY = model.eval(sy).toRealValue()?.let {
+                    it.numerator.toLong() / it.denominator.toLong()
+                } ?: throw RuntimeException("no sy found")
+                ansZ = model.eval(sz).toRealValue()?.let {
+                    it.numerator.toLong() / it.denominator.toLong()
+                } ?: throw RuntimeException("no sz found")
+            }
+        }
+
+        // position x + y + z
+        return ansX + ansY + ansZ
     }
 
     fun parseLine(line: String): Ray {
@@ -87,6 +165,11 @@ class Day24 {
         val p2y = r1.loc.y + r1.vel.y
 
         return (p2y - p1y) / (p2x - p1x)
+    }
+
+    fun part2(): Long {
+        val lines = File("inputs/day24.txt").readLines()
+        return solvePart2(lines)
     }
 
 }
