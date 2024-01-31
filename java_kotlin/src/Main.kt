@@ -1,3 +1,19 @@
+//import day06.Day06
+//import day07.Day07
+//import day07.Day07Part2
+//import day08.Day08
+//import day09.Day09
+//import day10.Day10
+//import day16.Day16
+//import day17.Day17
+//import day18.Day18
+//import day19.Day19
+//import day20.Day20
+//import day21.Day21
+//import day22.Day22
+//import day23.Day23
+//import day24.Day24
+//import day24.Day24Orig
 import day25.Day25
 
 fun main() {
@@ -76,6 +92,7 @@ fun main() {
 
     println("Day 25")
     val day25 = Day25()
-    println(day25.part1()) //12631 too low, 15596 too high
+    println(day25.part1()) // too low: 531080, 531392
+    // too high: 531440
 //    println(day25.part2())
 }
