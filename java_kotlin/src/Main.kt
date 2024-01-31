@@ -92,7 +92,8 @@ fun main() {
 
     println("Day 25")
     val day25 = Day25()
-    println(day25.part1()) // too low: 531080, 531392
+    println(day25.part1())
+    // too low: 531080, 531392
     // too high: 531440
 //    println(day25.part2())
 }

@@ -36,7 +36,12 @@ class Day25 {
         // Sort nodes to left/right
         val sortedNodes = mutableMapOf<String, Sort>()
 
-        var a = traversal.removeFirst()!!
+        var a = if (traversal.contains("ntq")) {
+            traversal.remove("ntq")
+            "ntq"
+        } else {
+            traversal.removeFirst()!!
+        }
         sortedNodes[a] = Sort.LEFT
 
         while (traversal.isNotEmpty()) {
@@ -44,6 +49,9 @@ class Day25 {
                 if (sortedNodes.containsKey(b)) continue
 
                 val sameSide = isSameSide(nodes, a, b)
+                if (b == "jqt") {
+                    val sameSide1 = isSameSide(nodes, a, b)
+                }
                 if (sameSide) {
                     sortedNodes[b] = sortedNodes[a]!!
                 } else {
@@ -59,39 +67,103 @@ class Day25 {
         return (l * r).toLong()
     }
 
-    private fun isSameSide(nodes: Map<String, Node>, a: String, b: String): Boolean {
-        // We're going to find paths between node a and node b
-        // If there are 4+ paths then we're on the same side, if there are only 3
-        // then we know we're crossing over the boundary
-        val visited = mutableSetOf<String>()
-        val toVisit = LinkedHashSet<String>()
+
+    private fun isSameSide(nodes: Map<String, Node>, aId: String, bId: String): Boolean {
+        println("\nFinding paths from $aId => $bId")
+        val a = PathNode(aId)
+        val b = PathNode(bId)
+
+        // Can't use the starting node as part of a path
+        val usedNodes = mutableSetOf<PathNode>()
+        usedNodes.add(a)
+        // We don't want to use b as a transit point for another path
+        if (nodes[aId]!!.connectedNodes.contains(Node(bId))) {
+            usedNodes.add(b)
+        }
+
+        // Count paths
         var paths = 0
 
-        visited.add(a)
-        visited.add(b)
-        toVisit.addAll(nodes[a]!!.connectedNodes.map { it.id })
-        if (toVisit.remove(b)) paths += 1
+        // The most possible unique paths there can be from
+        // a to b is equal to the number of connected nodes to a
+        // so let's just iterate over those
+        var firstSearch = true
+        var foundPath: List<PathNode>? = null
+        while (firstSearch || foundPath != null) {
+            firstSearch = false
+            foundPath = findPath(nodes, usedNodes, a, b)
+            usedNodes.addAll(foundPath ?: listOf())
+            paths += 1
+        }
+        println("$aId => $bId: $paths paths found")
+        return paths >= 4
+    }
 
-        while (toVisit.isNotEmpty() && paths <= 3) {
+    private fun findPath(
+        nodes: Map<String, Node>,
+        usedNodes: MutableSet<PathNode>,
+        a: PathNode,
+        b: PathNode
+    ): List<PathNode>? {
+
+        val visited = mutableSetOf<PathNode>()
+        val toVisit = LinkedHashSet<PathNode>()
+
+        toVisit.add(a)
+
+        while (toVisit.isNotEmpty()) {
             val currNode = toVisit.removeFirst()
             visited.add(currNode)
+            for (cn in nodes[currNode.node]!!.connectedNodes) {
+                val currentNode = PathNode(cn.id)
 
-            nodes[currNode]!!.connectedNodes
-                .forEach {
-                    if (it.id == b) {
-                        paths += 1
+                if (cn.id == b.node) {
+                    // Add all nodes from this path to the used nodes
+                    // And stop
+                    val path = mutableListOf<PathNode>()
+                    print("  ${cn.id}")
+                    print(" <= ${currNode.node}")
+                    path.add(currentNode)
+                    path.add(currNode)
+                    var prevNode = currNode.prevNode
+                    while (prevNode != null) {
+                        path.add(prevNode)
+                        print(" <= ${prevNode.node}")
+                        prevNode = prevNode.prevNode
                     }
-                    if (!visited.contains(it.id) && !toVisit.contains(it.id)) {
-                        toVisit.add(it.id)
+                    println()
+
+                    val pathCopy = path.toMutableList()
+                    pathCopy.remove(a)
+                    pathCopy.remove(b)
+                    if (path.size > 2 && pathCopy.all { !usedNodes.contains(it) }) {
+                        return path
                     }
+
                 }
+                val nextNode = currentNode
+                nextNode.prevNode = currNode
+                if (
+                    !visited.contains(nextNode) &&
+                    !toVisit.contains(nextNode) &&
+                    !usedNodes.contains(nextNode)
+                ) {
+                    toVisit.add(nextNode)
+                }
+            }
         }
-        return paths >= 4
+
+        // No path found
+        return null
     }
 
     private fun traversalOrder(nodes: Map<String, Node>): List<String> {
         // We just need to start somewhere, doesn't even matter where
-        val a = nodes.keys.first()
+        val a = if (nodes.containsKey("ntq")) {
+            "ntq"
+        } else {
+            nodes.keys.first()
+        }
 
         val visited = LinkedHashSet<String>()
         val toVisit = LinkedHashSet<String>()
@@ -114,6 +186,10 @@ class Day25 {
 
 data class Node(val id: String) {
     var connectedNodes: MutableSet<Node> = mutableSetOf()
+}
+
+data class PathNode(val node: String) {
+    var prevNode: PathNode? = null
 }
 
 enum class Sort {
