@@ -49,7 +49,7 @@ class Day25 {
                 if (sortedNodes.containsKey(b)) continue
 
                 val sameSide = isSameSide(nodes, a, b)
-                if (b == "jqt") {
+                if (b == "rsh") {
                     val sameSide1 = isSameSide(nodes, a, b)
                 }
                 if (sameSide) {
@@ -67,8 +67,55 @@ class Day25 {
         return (l * r).toLong()
     }
 
+    private fun isSameSide(nodes: Map<String, Node>, startId: String, destId: String): Boolean {
+        val paths = LinkedHashSet<LinkedHashSet<PathNode>>()
+        val usedEdges = mutableSetOf<PathNode>()
+        val toVisit = LinkedHashSet<PathNode>()
 
-    private fun isSameSide(nodes: Map<String, Node>, aId: String, bId: String): Boolean {
+        val start = PathNode(startId)
+        val dest = PathNode(destId)
+
+        toVisit.add(start)
+        while (toVisit.isNotEmpty()) {
+            val currNode = toVisit.removeFirst()
+            usedEdges.add(currNode)
+            for (nextNode in nodes[currNode.id]!!.connectedNodes.map { it.toPathNode() }) {
+                nextNode.prevNode = currNode
+                if (nextNode == dest) {
+                    // Construct the path
+                    val path = mutableListOf<PathNode>()
+                    path.add(dest)
+                    var prevNode = currNode
+                    while (prevNode != null) {
+                        path.add(prevNode)
+                        prevNode = prevNode.prevNode
+                    }
+                    path.reverse()
+                    val pathSet = LinkedHashSet<PathNode>(path)
+                    if (paths.contains(pathSet)) {
+                        // continue, this is a noop
+                    } else {
+                        paths.add(pathSet)
+                        toVisit.clear()
+                        usedEdges.clear()
+                        toVisit.add(start)
+                        usedEdges.addAll(paths.flatten())
+                        break
+                    }
+                }
+                if (
+                    !usedEdges.contains(nextNode) &&
+                    !toVisit.contains(nextNode)
+                ) {
+                    toVisit.add(nextNode)
+                }
+            }
+        }
+
+        return paths.size >= 4
+    }
+
+    private fun xisSameSide(nodes: Map<String, Node>, aId: String, bId: String): Boolean {
         println("\nFinding paths from $aId => $bId")
         val a = PathNode(aId)
         val b = PathNode(bId)
@@ -114,21 +161,21 @@ class Day25 {
         while (toVisit.isNotEmpty()) {
             val currNode = toVisit.removeFirst()
             visited.add(currNode)
-            for (cn in nodes[currNode.node]!!.connectedNodes) {
+            for (cn in nodes[currNode.id]!!.connectedNodes) {
                 val currentNode = PathNode(cn.id)
 
-                if (cn.id == b.node) {
+                if (cn.id == b.id) {
                     // Add all nodes from this path to the used nodes
                     // And stop
                     val path = mutableListOf<PathNode>()
                     print("  ${cn.id}")
-                    print(" <= ${currNode.node}")
+                    print(" <= ${currNode.id}")
                     path.add(currentNode)
                     path.add(currNode)
                     var prevNode = currNode.prevNode
                     while (prevNode != null) {
                         path.add(prevNode)
-                        print(" <= ${prevNode.node}")
+                        print(" <= ${prevNode.id}")
                         prevNode = prevNode.prevNode
                     }
                     println()
@@ -186,9 +233,12 @@ class Day25 {
 
 data class Node(val id: String) {
     var connectedNodes: MutableSet<Node> = mutableSetOf()
+    fun toPathNode(): PathNode {
+        return PathNode(id)
+    }
 }
 
-data class PathNode(val node: String) {
+data class PathNode(val id: String) {
     var prevNode: PathNode? = null
 }
 
