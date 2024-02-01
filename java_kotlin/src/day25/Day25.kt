@@ -49,9 +49,9 @@ class Day25 {
                 if (sortedNodes.containsKey(b)) continue
 
                 val sameSide = isSameSide(nodes, a, b)
-                if (b == "rsh") {
+//                if (b == "rsh") {
                     val sameSide1 = isSameSide(nodes, a, b)
-                }
+//                }
                 if (sameSide) {
                     sortedNodes[b] = sortedNodes[a]!!
                 } else {
@@ -62,14 +62,15 @@ class Day25 {
         }
 
         assert(sortedNodes.size == nodes.size)
-        val l = sortedNodes.count { it.value == Sort.LEFT }
-        val r = sortedNodes.count { it.value == Sort.RIGHT }
-        return (l * r).toLong()
+        val l = sortedNodes.filter { it.value == Sort.LEFT }
+        val r = sortedNodes.filter { it.value == Sort.RIGHT }
+        return (l.size * r.size).toLong()
     }
 
     private fun isSameSide(nodes: Map<String, Node>, startId: String, destId: String): Boolean {
         val paths = LinkedHashSet<LinkedHashSet<PathNode>>()
-        val usedEdges = mutableSetOf<PathNode>()
+        val usedEdges = mutableSetOf<Set<PathNode>>()
+        val tmpUsedEdges = mutableSetOf<Set<PathNode>>()
         val toVisit = LinkedHashSet<PathNode>()
 
         val start = PathNode(startId)
@@ -78,9 +79,16 @@ class Day25 {
         toVisit.add(start)
         while (toVisit.isNotEmpty()) {
             val currNode = toVisit.removeFirst()
-            usedEdges.add(currNode)
+
             for (nextNode in nodes[currNode.id]!!.connectedNodes.map { it.toPathNode() }) {
+                val thisEdge = setOf(currNode, nextNode)
+                if (usedEdges.contains(thisEdge) || tmpUsedEdges.contains(thisEdge)) {
+                    continue
+                }
+
+                tmpUsedEdges.add(thisEdge)
                 nextNode.prevNode = currNode
+
                 if (nextNode == dest) {
                     // Construct the path
                     val path = mutableListOf<PathNode>()
@@ -91,22 +99,23 @@ class Day25 {
                         prevNode = prevNode.prevNode
                     }
                     path.reverse()
+                    path.windowed(2)
+                        .forEach { usedEdges.add(it.toSet()) }
                     val pathSet = LinkedHashSet<PathNode>(path)
-                    if (paths.contains(pathSet)) {
-                        // continue, this is a noop
-                    } else {
-                        paths.add(pathSet)
-                        toVisit.clear()
-                        usedEdges.clear()
-                        toVisit.add(start)
-                        usedEdges.addAll(paths.flatten())
-                        break
-                    }
+                    paths.add(pathSet)
+                    toVisit.clear()
+                    toVisit.add(start)
+                    tmpUsedEdges.clear()
+                    break
                 }
-                if (
-                    !usedEdges.contains(nextNode) &&
-                    !toVisit.contains(nextNode)
-                ) {
+//                else if (
+////                    !usedEdges.contains(nextNode) &&
+//                    toVisit.contains(nextNode)
+//                ) {
+//                    toVisit.add(nextNode)
+//                }
+                else {
+
                     toVisit.add(nextNode)
                 }
             }
